@@ -358,6 +358,43 @@
   footer .motto{margin-bottom:18px}
 
   /* reveal animation */
+  /* sponsors strip: fed by the club app, hidden until the list arrives */
+  .sponsors{background:var(--ink)}
+  .sponsor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:40px}
+  @media(min-width:720px){.sponsor-grid{grid-template-columns:repeat(4,1fr)}}
+  .sponsor{
+    display:block;background:var(--steel);border:1px solid rgba(255,255,255,0.07);border-top:4px solid var(--red);
+    padding:22px 18px;text-decoration:none;color:var(--bone);transition:transform .25s, border-color .25s;
+  }
+  a.sponsor:hover{transform:translateY(-6px);border-top-color:var(--red-bright)}
+  .sponsor img{display:block;width:100%;max-height:90px;object-fit:contain;margin-bottom:14px;background:#fff;padding:8px;border-radius:3px}
+  .sponsor h3{font-family:var(--stencil);font-weight:400;text-transform:uppercase;font-size:1.05rem;letter-spacing:0.02em;margin-bottom:6px}
+  .sponsor p{color:var(--bone-dim);font-size:0.9rem}
+
+  /* join enquiry form: posts into the club app */
+  .enquiry{max-width:560px;margin:0 auto 34px;text-align:left;display:grid;gap:16px}
+  .enquiry-row{display:grid;gap:16px}
+  @media(min-width:600px){.enquiry-row{grid-template-columns:1fr 1fr}}
+  .enquiry label{display:block;font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;color:var(--bone-dim)}
+  .enquiry .optional{font-family:"Helvetica Neue",Arial,sans-serif;text-transform:none;letter-spacing:0;color:var(--bone-mute)}
+  .enquiry input[type=text],.enquiry input[type=email],.enquiry textarea{
+    display:block;width:100%;margin-top:6px;padding:12px 14px;font:inherit;font-size:1rem;color:var(--bone);
+    background:var(--steel);border:1px solid rgba(255,255,255,0.12);border-radius:3px;
+  }
+  .enquiry textarea{resize:vertical;min-height:90px}
+  .enquiry-chapter{border:0;padding:0;display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center}
+  .enquiry-chapter legend{font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;color:var(--bone-dim);margin-bottom:8px}
+  .enquiry-chapter label{display:flex;align-items:center;gap:8px;font-family:"Helvetica Neue",Arial,sans-serif;text-transform:none;letter-spacing:0;font-size:1rem;color:var(--bone)}
+  .enquiry-chapter input{accent-color:var(--red-bright);width:18px;height:18px}
+  .enquiry-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .enquiry-msg{min-height:1.4em;font-size:0.95rem;color:var(--bone-dim)}
+  .enquiry-msg.bad{color:var(--red-text)}
+  .enquiry-msg.good{color:#8fd19e}
+  .enquiry .btn{justify-self:start}
+  .enquiry .btn[disabled]{opacity:0.6;cursor:wait}
+  .enquiry-or{color:var(--bone-mute);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:4px}
+  .join{position:relative}
+
   .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease, transform .7s ease}
   .reveal.in{opacity:1;transform:none}
 .calendar-embed .fc{background:#ffffff;color:#171515;border-radius:4px;padding:10px;border:1px solid rgba(0,0,0,0.12)}
@@ -753,6 +790,17 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
 </section>
 
 <!-- PODCAST -->
+<section class="block sponsors" id="sponsors" hidden>
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Backing The Club</p>
+      <h2 class="display">Our Sponsors</h2>
+      <p class="lead">The businesses that help keep the Rusty Bus on the road and the charity rides rolling. Members see their deals in the app.</p>
+    </div>
+    <div class="sponsor-grid reveal" id="sponsor-grid"></div>
+  </div>
+</section>
+
 <section class="block podcast" id="podcast">
   <div class="wrap">
     <div class="reveal">
@@ -828,7 +876,25 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
   <div class="wrap reveal">
     <p class="eyebrow">Get Involved</p>
     <h2 class="display">Ride With Us</h2>
-    <p class="lead">Rustnuts SMC welcomes riders of all backgrounds who share a passion for motorcycles, family and giving back. Reach out — we'll point you to the next ride.</p>
+    <p class="lead">Rustnuts SMC welcomes riders of all backgrounds who share a passion for motorcycles, family and giving back. Tell us a bit about yourself and the chapter board will be in touch.</p>
+    <form class="enquiry" id="enquiry" novalidate>
+      <div class="enquiry-row">
+        <label>Your name<input type="text" name="name" autocomplete="name" maxlength="80" required></label>
+        <label>Email<input type="email" name="email" autocomplete="email" maxlength="200" required></label>
+      </div>
+      <fieldset class="enquiry-chapter">
+        <legend>Which chapter?</legend>
+        <label><input type="radio" name="chapter" value="west"> West</label>
+        <label><input type="radio" name="chapter" value="north"> North</label>
+        <label><input type="radio" name="chapter" value="either" checked> Either</label>
+      </fieldset>
+      <label>About you and your bike <span class="optional">(optional)</span><textarea name="about" rows="3" maxlength="600" placeholder="What you ride, where you're based, what you're after."></textarea></label>
+      <!-- Not for people: left empty by everyone but robots -->
+      <label class="enquiry-hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      <p class="enquiry-msg" id="enquiry-msg" role="status" aria-live="polite"></p>
+      <button type="submit" class="btn btn-primary" id="enquiry-send">Send Enquiry</button>
+    </form>
+    <p class="enquiry-or">Or find us here</p>
     <div class="social">
       <a href="https://www.facebook.com/RustnutsSMC/" target="_blank" rel="noopener">Facebook</a>
       <a href="https://www.instagram.com/rustnuts_social2019/" target="_blank" rel="noopener">Instagram</a>
@@ -938,6 +1004,43 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
         if(sel){ panel.removeAttribute('hidden'); } else { panel.setAttribute('hidden',''); }
       });
     });
+  });
+</script>
+<script type="module">
+  import { loadSponsors, sponsorsHtml, sendEnquiry, WORDS } from './app/site-api.js';
+
+  // Sponsors: read from the club app; the strip stays hidden unless there's something to show.
+  loadSponsors().then((list) => {
+    const html = sponsorsHtml(list);
+    if (!html) return;
+    const grid = document.getElementById('sponsor-grid');
+    grid.innerHTML = html;
+    const section = document.getElementById('sponsors');
+    section.hidden = false;
+    section.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
+  });
+
+  // The join form: checked here with the app's words, then sent into the app.
+  const form = document.getElementById('enquiry');
+  const msg = document.getElementById('enquiry-msg');
+  const send = document.getElementById('enquiry-send');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const input = {
+      name: data.get('name'), email: data.get('email'), chapter: data.get('chapter'),
+      about: data.get('about'), website: data.get('website'),
+    };
+    msg.className = 'enquiry-msg'; msg.textContent = '';
+    send.disabled = true; send.textContent = 'Sending…';
+    const result = await sendEnquiry(input);
+    send.disabled = false; send.textContent = 'Send Enquiry';
+    if (result.ok) {
+      form.reset();
+      msg.className = 'enquiry-msg good'; msg.textContent = WORDS.thanks;
+    } else {
+      msg.className = 'enquiry-msg bad'; msg.textContent = result.error;
+    }
   });
 </script>
 </body>
