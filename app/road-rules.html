@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Generated from the Rustnuts app repo (src/domain/roadRulesPage.ts) by `npm run build:site`. Change the words there, not here. -->
+<title>Road Rules | Rustnuts SMC</title>
+<meta name="description" content="How Rustnuts SMC rides together and stays safe: the club’s group riding procedures, illustrated." />
+<link rel="canonical" href="https://www.rustnutssmc.com.au/app/road-rules.html" />
+<meta name="theme-color" content="#8C1C24" />
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Rustnuts SMC" />
+<meta property="og:title" content="Road Rules" />
+<meta property="og:description" content="How Rustnuts SMC rides together and stays safe: the club’s group riding procedures, illustrated." />
+<meta property="og:image" content="https://www.rustnutssmc.com.au/rustnuts-smc-logo.jpg" />
+<meta property="og:url" content="https://www.rustnutssmc.com.au/app/road-rules.html" />
+<meta property="og:locale" content="en_AU" />
+<link rel="preload" href="../fonts/RustnutsStencil-Regular.ttf" as="font" type="font/ttf" crossorigin />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  /* the app's pages, in the site's clothes */
+  body{background:var(--ink);overflow-x:hidden}
+  .app-hero{
+    padding:130px 28px 36px;text-align:center;position:relative;z-index:2;
+    background:radial-gradient(circle at 70% 30%, rgba(140,28,36,0.35), transparent 55%), var(--ink);
+  }
+  .app-hero h1{font-size:clamp(2rem,6vw,3.4rem);margin-bottom:10px}
+  .app-hero .updated{font-family:var(--stencil);color:var(--bone-mute);letter-spacing:0.08em;text-transform:uppercase;font-size:0.85rem}
+  .app-page{position:relative;z-index:2;padding:10px 28px 80px}
+  .app-page .wrap{max-width:760px;margin:0 auto;color:var(--bone-dim);font-size:1.02rem}
+  .app-page h2{font-family:var(--stencil);font-weight:400;text-transform:uppercase;letter-spacing:0.03em;color:var(--bone);font-size:1.4rem;margin:36px 0 10px}
+  .app-page section{margin:0 0 8px}
+  .app-page p{margin:10px 0}
+  .app-page .intro{font-size:1.12rem;color:var(--bone)}
+  .app-page ul,.app-page ol{padding-left:22px;margin:8px 0}
+  .app-page li{margin:6px 0}
+  .app-page li::marker{color:var(--red-bright)}
+  .app-page strong{color:var(--bone);font-weight:600}
+  .app-page a{color:var(--red-text)}
+  .app-page .small{color:var(--bone-mute);font-size:0.9rem}
+  .app-page table{width:100%;border-collapse:collapse;margin:12px 0}
+  .app-page th,.app-page td{text-align:left;vertical-align:top;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.12)}
+  .app-page th{font-family:var(--stencil);font-weight:400;letter-spacing:0.04em;color:var(--bone)}
+  .app-page tbody th{white-space:nowrap}
+  .app-pages{max-width:760px;margin:40px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);color:var(--bone-mute);font-size:0.9rem;text-align:center}
+  .app-pages a{color:var(--bone-dim);text-decoration:none;border-bottom:1px solid transparent}
+  .app-pages a:hover{color:var(--red-text);border-bottom-color:var(--red-text)}
+  .rr-figure{margin:28px 0}
+  .rr-figure img{display:block;width:100%;height:auto;border-radius:6px;background:#fff}
+  .rr-figure figcaption{font-family:var(--stencil);color:var(--bone);letter-spacing:0.04em;margin-top:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="brand">
+    <img src="../rustnuts-smc-logo.jpg" alt="Rustnuts SMC logo" />
+  </a>
+  <nav class="nav-links">
+    <a href="../index.html">Home</a>
+    <a href="../charity.html">Charity Rides</a>
+    <a href="../resources.html">Support</a>
+    <a href="../shop.html" class="nav-shop">Shop</a>
+    <a href="../index.html#join">Join</a>
+  </nav>
+  <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-label="Menu" aria-controls="nav-mobile">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<nav class="nav-mobile" id="nav-mobile" aria-label="Mobile navigation">
+  <a href="../index.html">Home</a>
+  <a href="../charity.html">Charity Rides</a>
+  <a href="../resources.html">Support</a>
+  <a href="../shop.html" class="nav-shop">Shop</a>
+  <a href="../index.html#join">Join</a>
+</nav>
+
+<section class="app-hero">
+  <p class="eyebrow" style="color:var(--red-text);font-weight:800;letter-spacing:0.25em;text-transform:uppercase;font-size:0.75rem;margin-bottom:12px">The rulebook</p>
+  <h1 class="display">Road Rules</h1>
+  <p class="updated">Group riding procedures, illustrated</p>
+</section>
+
+<section class="app-page">
+  <div class="wrap">
+    <p class="intro">How we ride together and stay safe. These diagrams show the club’s group riding procedures: who does what in the pack, formation, hand signals, passing, turns, lane changes and stops.</p>
+    <p>Members read the full written Road Rules and sign them each year. Road law applies at all times, and nothing here gives anyone right of way. Tap a diagram to see it full size.</p>
+    <figure class="rr-figure" id="roles">
+      <a href="road-rules/roles.png"><img src="road-rules/roles.png" width="1600" height="2280" loading="lazy" alt="Ride roles and assigned tasks" /></a>
+      <figcaption>Rule 3 · Ride roles and assigned tasks</figcaption>
+    </figure>
+    <figure class="rr-figure" id="formation">
+      <a href="road-rules/formation.png"><img src="road-rules/formation.png" width="1600" height="2280" loading="lazy" alt="Staggered formation and normal pack order" /></a>
+      <figcaption>Rule 7 · Staggered formation and normal pack order</figcaption>
+    </figure>
+    <figure class="rr-figure" id="single-file">
+      <a href="road-rules/single-file.png"><img src="road-rules/single-file.png" width="1600" height="2200" loading="lazy" alt="Staggered to single file" /></a>
+      <figcaption>Rule 7 · Staggered to single file</figcaption>
+    </figure>
+    <figure class="rr-figure" id="axle-to-axle">
+      <a href="road-rules/axle-to-axle.png"><img src="road-rules/axle-to-axle.png" width="1600" height="2200" loading="lazy" alt="Staggered and axle to axle formation" /></a>
+      <figcaption>Rule 9 · Staggered and axle to axle formation</figcaption>
+    </figure>
+    <figure class="rr-figure" id="readiness">
+      <a href="road-rules/readiness.png"><img src="road-rules/readiness.png" width="1600" height="1560" loading="lazy" alt="Raised hand readiness check" /></a>
+      <figcaption>Rule 8 · Raised hand readiness check</figcaption>
+    </figure>
+    <figure class="rr-figure" id="signals-1">
+      <a href="road-rules/signals-1.png"><img src="road-rules/signals-1.png" width="1600" height="1960" loading="lazy" alt="Hand signals page 1 of 3" /></a>
+      <figcaption>Rule 11 · Hand signals page 1 of 3</figcaption>
+    </figure>
+    <figure class="rr-figure" id="signals-2">
+      <a href="road-rules/signals-2.png"><img src="road-rules/signals-2.png" width="1600" height="1960" loading="lazy" alt="Hand signals page 2 of 3" /></a>
+      <figcaption>Rule 11 · Hand signals page 2 of 3</figcaption>
+    </figure>
+    <figure class="rr-figure" id="signals-3">
+      <a href="road-rules/signals-3.png"><img src="road-rules/signals-3.png" width="1600" height="2220" loading="lazy" alt="Hand signals page 3 of 3" /></a>
+      <figcaption>Rule 11 · Hand signals page 3 of 3</figcaption>
+    </figure>
+    <figure class="rr-figure" id="pass-signal">
+      <a href="road-rules/pass-signal.png"><img src="road-rules/pass-signal.png" width="1600" height="1580" loading="lazy" alt="Passing a signal through the pack" /></a>
+      <figcaption>Rule 11 · Passing a signal through the pack</figcaption>
+    </figure>
+    <figure class="rr-figure" id="arm-up">
+      <a href="road-rules/arm-up.png"><img src="road-rules/arm-up.png" width="1600" height="2260" loading="lazy" alt="The RC arm up overtaking procedure" /></a>
+      <figcaption>Rule 12 · The RC arm up overtaking procedure</figcaption>
+    </figure>
+    <figure class="rr-figure" id="abort">
+      <a href="road-rules/abort.png"><img src="road-rules/abort.png" width="1600" height="2260" loading="lazy" alt="Closing the passing window and aborting" /></a>
+      <figcaption>Rule 12 · Closing the passing window and aborting</figcaption>
+    </figure>
+    <figure class="rr-figure" id="turning">
+      <a href="road-rules/turning.png"><img src="road-rules/turning.png" width="1600" height="2000" loading="lazy" alt="Turning paths" /></a>
+      <figcaption>Rule 13 · Turning paths</figcaption>
+    </figure>
+    <figure class="rr-figure" id="keep-left">
+      <a href="road-rules/keep-left.png"><img src="road-rules/keep-left.png" width="1600" height="2100" loading="lazy" alt="Keep left for returning riders" /></a>
+      <figcaption>Rule 13 · Keep left for returning riders</figcaption>
+    </figure>
+    <figure class="rr-figure" id="snake">
+      <a href="road-rules/snake.png"><img src="road-rules/snake.png" width="1600" height="1820" loading="lazy" alt="Snake lane change" /></a>
+      <figcaption>Rule 14 · Snake lane change</figcaption>
+    </figure>
+    <figure class="rr-figure" id="protected">
+      <a href="road-rules/protected.png"><img src="road-rules/protected.png" width="1600" height="2060" loading="lazy" alt="Protected lane change" /></a>
+      <figcaption>Rule 15 · Protected lane change</figcaption>
+    </figure>
+    <figure class="rr-figure" id="support-vehicles">
+      <a href="road-rules/support-vehicles.png"><img src="road-rules/support-vehicles.png" width="1600" height="1800" loading="lazy" alt="Support vehicle arrangements" /></a>
+      <figcaption>Rule 10 · Support vehicle arrangements</figcaption>
+    </figure>
+    <figure class="rr-figure" id="tail-gunner">
+      <a href="road-rules/tail-gunner.png"><img src="road-rules/tail-gunner.png" width="1600" height="1900" loading="lazy" alt="Tail Gunner assistance and named backup takeover" /></a>
+      <figcaption>Rule 17 · Tail Gunner assistance and named backup takeover</figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer>
+  <p class="motto">Rust Till Dust</p>
+  <p><strong>Rustnuts SMC</strong> — Rustnuts Social Motorcycle Club Incorporated</p>
+  <p>Greater Melbourne, Victoria, Australia &nbsp;|&nbsp; <a href="../index.html">Back to home</a></p>
+  <p style="margin-top:10px">&copy; <span id="yr"></span> Rustnuts SMC. All rights reserved.</p>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  (function(){
+    const toggle = document.getElementById('nav-toggle');
+    const panel = document.getElementById('nav-mobile');
+    if(!toggle || !panel) return;
+    function closeMenu(){ toggle.setAttribute('aria-expanded','false'); panel.classList.remove('open'); }
+    function openMenu(){ toggle.setAttribute('aria-expanded','true'); panel.classList.add('open'); }
+    toggle.addEventListener('click', ()=>{
+      if(toggle.getAttribute('aria-expanded')==='true'){ closeMenu(); } else { openMenu(); }
+    });
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && toggle.getAttribute('aria-expanded')==='true'){ closeMenu(); toggle.focus(); }
+    });
+    panel.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
+  })();
+</script>
+</body>
+</html>
