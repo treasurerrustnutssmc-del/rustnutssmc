@@ -455,7 +455,7 @@ export function recordVisit(path = location.pathname, fetchFn = fetch, nav = nav
   try {
     if (nav.doNotTrack === '1' || nav.globalPrivacyControl === true) return false;
     const body = JSON.stringify({ page: path === '/index.html' ? '/' : path });
-    if (typeof nav.sendBeacon === 'function' && nav.sendBeacon(`${SITE_API}/visit`, new Blob([body], { type: 'application/json' }))) return true;
+    // Plain fetch with keepalive, not sendBeacon: the API gateway answers a beacon POST with 503 (seen 1 Nov 2026), fetch gets 204.
     fetchFn(`${SITE_API}/visit`, { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).catch(() => {});
     return true;
   } catch {

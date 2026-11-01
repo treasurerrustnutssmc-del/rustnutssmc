@@ -18,17 +18,16 @@ test('recordVisit posts the page path once and asks for nothing back', async () 
   assert.deepEqual(JSON.parse(calls[1].init.body), { page: '/' });
 });
 
-test('recordVisit prefers sendBeacon, and honours Do Not Track and Global Privacy Control', () => {
+test('recordVisit uses fetch even when sendBeacon exists (the beacon POST is refused by the server), and honours Do Not Track and Global Privacy Control', () => {
   const beacons = [];
   const n = nav({ sendBeacon: (url, blob) => { beacons.push({ url, type: blob.type }); return true; } });
   let fetched = 0;
   assert.equal(recordVisit('/', () => { fetched++; return Promise.resolve(); }, n), true);
-  assert.equal(beacons.length, 1);
-  assert.equal(beacons[0].type, 'application/json');
-  assert.equal(fetched, 0);
+  assert.equal(beacons.length, 0);
+  assert.equal(fetched, 1);
   assert.equal(recordVisit('/', () => { fetched++; return Promise.resolve(); }, nav({ doNotTrack: '1' })), false);
   assert.equal(recordVisit('/', () => { fetched++; return Promise.resolve(); }, nav({ globalPrivacyControl: true })), false);
-  assert.equal(fetched, 0);
+  assert.equal(fetched, 1);
 });
 
 test('recordVisit never throws', () => {
