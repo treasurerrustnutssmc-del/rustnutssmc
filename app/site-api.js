@@ -317,3 +317,98 @@ export async function loadCharityRides(fetchFn = fetch) {
     return [];
   }
 }
+
+// ---------------------------------------------------------------------------
+// Club documents: the Constitution from the app's document library
+// ---------------------------------------------------------------------------
+
+export const DOCUMENT_WORDS = {
+  offline: 'The club app can’t be reached just now, so here is the Constitution as a PDF.',
+  publishedPrefix: 'Published',
+  approvedPrefix: 'Approved by',
+  commencesPrefix: 'in force from',
+};
+
+/** The approving bodies, in the app's words. */
+export const APPROVING_BODIES = {
+  association_general_meeting: 'Association general meeting',
+  association_committee: 'Association Committee',
+  full_members: 'Full Members’ vote',
+  nec: 'NEC',
+  chapter_board: 'Chapter Board',
+};
+
+/**
+ * The library's text format, as the app reads it (rulesBlocks in the app repo): a line starting
+ * "# " is a heading, "- " a bullet, a blank line ends a paragraph, other lines join a paragraph.
+ */
+export function documentBlocks(body) {
+  const blocks = [];
+  let para = [];
+  const push = (kind, text) => { if (text !== '') blocks.push({ kind, text }); };
+  const endPara = () => { push('para', para.join(' ')); para = []; };
+  for (const raw of String(body ?? '').split(/\r\n|\r|\n/)) {
+    const line = raw.trimEnd();
+    const marker = line === '#' || line.startsWith('# ') ? 'heading' : line === '-' || line.startsWith('- ') ? 'bullet' : null;
+    if (marker) {
+      endPara();
+      push(marker, line.slice(1).trim());
+    } else if (line === '') {
+      endPara();
+    } else {
+      para.push(line.trim());
+    }
+  }
+  endPara();
+  return blocks;
+}
+
+/** The line under the heading: label, publication date and the approval facts when recorded. */
+export function documentMetaLine(doc) {
+  const parts = [];
+  if (doc.label) parts.push(doc.label);
+  const date = (v) => (v ? auDate(v) : '');
+  const published = date(doc.published_at);
+  if (published) parts.push(`${DOCUMENT_WORDS.publishedPrefix} ${published}`);
+  const body = APPROVING_BODIES[doc.approving_body];
+  const approved = date(doc.approved_on);
+  const commences = date(doc.commences_on);
+  if (body && approved) parts.push(`${DOCUMENT_WORDS.approvedPrefix} ${body} ${approved}${commences ? `, ${DOCUMENT_WORDS.commencesPrefix} ${commences}` : ''}`);
+  return parts.join(' · ');
+}
+
+/** The document's text as HTML: headings with anchors, bullets grouped into lists, paragraphs. Takes the text or its blocks. */
+export function documentHtml(body) {
+  const out = [];
+  let list = [];
+  let headings = 0;
+  const endList = () => { if (list.length) { out.push(`<ul>${list.join('')}</ul>`); list = []; } };
+  for (const b of Array.isArray(body) ? body : documentBlocks(body)) {
+    if (b.kind === 'bullet') { list.push(`<li>${esc(b.text)}</li>`); continue; }
+    endList();
+    if (b.kind === 'heading') out.push(`<h2 id="s${++headings}">${esc(b.text)}</h2>`);
+    else out.push(`<p>${esc(b.text)}</p>`);
+  }
+  endList();
+  return out.join('\n');
+}
+
+/** The Contents list: one link per heading, in order. Takes the text or its blocks. */
+export function documentContentsHtml(body) {
+  const items = (Array.isArray(body) ? body : documentBlocks(body)).filter((b) => b.kind === 'heading').map((b, i) => `<li><a href="#s${i + 1}">${esc(b.text)}</a></li>`);
+  return items.length ? `<ol>${items.join('')}</ol>` : '';
+}
+
+const isDocument = (d) => d && typeof d === 'object' && typeof d.kind === 'string' && typeof d.title === 'string' && typeof d.label === 'string' && typeof d.body === 'string' && d.body.trim() !== '';
+
+/** Loads the club documents from the app; resolves to [] on any failure (the page then offers the PDF). */
+export async function loadDocuments(fetchFn = fetch) {
+  try {
+    const r = await fetchFn(`${SITE_API}/documents`);
+    if (!r.ok) return [];
+    const body = await r.json();
+    return Array.isArray(body.documents) ? body.documents.filter(isDocument) : [];
+  } catch {
+    return [];
+  }
+}
