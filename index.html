@@ -621,21 +621,6 @@ var LABEL_ALIASES = {
 };
 var LABEL_TAG_RE = /label\s*:\s*([^\n\r<]+)/i;
 
-// Fallback for older events created before the description-tag convention.
-// Keyed by "startDate|Title" — only used if an event has no Label tag.
-var EVENT_LABELS = {
-'2026-09-13|Heathcote Loop': 'North',
-'2026-09-20|Guards of Valhalla': 'Supported Club Rides',
-'2026-10-23|MotoGp Weekend': 'Non-Nuts Events',
-'2026-08-27|Dubbo Motorfest': 'Non-Nuts Events',
-'2026-11-21|Silverbacks Coward Punch Ride': 'Supported Club Rides',
-'2027-02-12|Redback Rally': 'Non-Nuts Events',
-'2027-03-05|Brighter Days Festival': 'Non-Nuts Events',
-'2027-03-21|Black Dog Ride': 'Non-Nuts Events',
-'2027-05-01|International Female Ride Day': 'Non-Nuts Events',
-'2027-06-11|Fink Desert Race': 'Non-Nuts Events'
-};
-
 function escapeHtml(str) {
 return String(str || '').replace(/[&<>"']/g, function (c) {
 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -648,11 +633,6 @@ return '<a href="' + url + '" target="_blank" rel="noopener">' + url + '</a>';
 });
 }
 
-function eventKey(item) {
-var startDate = (item.start.date || item.start.dateTime || '').substring(0, 10);
-return startDate + '|' + (item.summary || '').trim();
-}
-
 function labelFromDescription(item) {
 var desc = item.description || '';
 var m = desc.match(LABEL_TAG_RE);
@@ -661,8 +641,11 @@ var raw = m[1].trim().toLowerCase().replace(/\s+/g, ' ');
 return LABEL_ALIASES[raw] || null;
 }
 
+// The colour comes from the event's Label tag alone. The club app reads the same tag when it syncs
+// the calendar and sends its answer in the ride feed, so an untagged event is coloured the same way
+// in both places (the calendar's own colour); the old hand-kept list of older events is gone.
 function eventLabel(item) {
-return labelFromDescription(item) || EVENT_LABELS[eventKey(item)];
+return labelFromDescription(item);
 }
 
 function eventColor(item) {
