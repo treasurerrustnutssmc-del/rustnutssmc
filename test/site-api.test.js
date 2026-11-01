@@ -84,3 +84,92 @@ test('an app ride becomes the calendar event shape the home page already underst
   assert.deepEqual(await loadRides(async () => ({ ok: false, json: async () => ({}) })), []);
   assert.deepEqual(await loadRides(async () => { throw new Error('offline'); }), []);
 });
+
+// ---------------------------------------------------------------------------
+// Charity ride sign-ups (charity.html)
+// ---------------------------------------------------------------------------
+import { SIGNUP_WORDS, charityRideHtml, charitySignupProblem, loadCharityRides, sendCharitySignup, signupFromForm } from '../app/site-api.js';
+
+const ride = {
+  ride_id: '2d1f1d2e-9f4a-4c1a-8f2b-0c1d2e3f4a5b', title: 'Toy Run', starts_at: '2027-12-05T00:00:00+00:00', all_day: false,
+  location: 'Hoppers Crossing', cause: 'Royal Children’s Hospital', about: 'Bring a <toy>', closes_on: '2027-12-03',
+  jobs: ['BBQ', 'Marshal'], places: 60, places_left: 12, open: true,
+};
+const form = { ride: ride.ride_id, name: 'Sam Rider', email: 'sam@example.com', phone: '', riding: true, pillion: false, guests: 0, guestNames: '', job: '', notes: '' };
+
+test('the sign-up form checks in the app order, with the app words', () => {
+  assert.equal(charitySignupProblem(form, ride.jobs), null);
+  assert.equal(charitySignupProblem({ ...form, ride: 'nope' }, ride.jobs), SIGNUP_WORDS.notOnWebsite);
+  assert.equal(charitySignupProblem({ ...form, name: ' ' }, ride.jobs), SIGNUP_WORDS.noName);
+  assert.equal(charitySignupProblem({ ...form, name: 'x'.repeat(81) }, ride.jobs), SIGNUP_WORDS.longName);
+  assert.equal(charitySignupProblem({ ...form, email: 'sam@example' }, ride.jobs), SIGNUP_WORDS.badEmail);
+  assert.equal(charitySignupProblem({ ...form, phone: '0'.repeat(31) }, ride.jobs), SIGNUP_WORDS.longPhone);
+  assert.equal(charitySignupProblem({ ...form, riding: false }, ride.jobs), SIGNUP_WORDS.nothingPicked);
+  assert.equal(charitySignupProblem({ ...form, riding: false, pillion: true, job: 'BBQ' }, ride.jobs), SIGNUP_WORDS.pillionNeedsRider);
+  assert.equal(charitySignupProblem({ ...form, guests: 11 }, ride.jobs), SIGNUP_WORDS.guests);
+  assert.equal(charitySignupProblem({ ...form, guests: 1.5 }, ride.jobs), SIGNUP_WORDS.guests);
+  assert.equal(charitySignupProblem({ ...form, job: 'Cook' }, ride.jobs), SIGNUP_WORDS.jobNotListed);
+  assert.equal(charitySignupProblem({ ...form, notes: 'x'.repeat(201) }, ride.jobs), SIGNUP_WORDS.tooLong);
+  assert.equal(charitySignupProblem({ ...form, riding: false, job: 'BBQ' }, ride.jobs), null);
+});
+
+test('a form element becomes the form the function expects', () => {
+  const data = new Map([['ride', ride.ride_id], ['name', ' Sam '], ['email', 'SAM@example.com'], ['phone', '0400 000 000'],
+    ['riding', 'on'], ['pillion', null], ['guests', '2'], ['guestNames', 'Kim, Lee'], ['job', 'BBQ'], ['notes', ''], ['website', '']]);
+  assert.deepEqual(signupFromForm(data), {
+    ride: ride.ride_id, name: ' Sam ', email: 'SAM@example.com', phone: '0400 000 000', riding: true, pillion: false, guests: 2,
+    guestNames: 'Kim, Lee', job: 'BBQ', notes: '', website: '',
+  });
+  assert.equal(signupFromForm(new Map([['guests', 'two']])).guests, Number.NaN);
+});
+
+test('sending posts the trimmed sign-up with the honeypot and reads the answer', async () => {
+  const calls = [];
+  const fetchOk = async (url, init) => { calls.push({ url, init }); return { ok: true, json: async () => ({ ok: true }) }; };
+  assert.deepEqual(await sendCharitySignup({ ...form, name: ' Sam Rider ', guests: 1, guestNames: ' Kim ', job: 'BBQ', website: '' }, ride.jobs, fetchOk), { ok: true });
+  assert.ok(calls[0].url.endsWith('/site-api/charity-signup'));
+  assert.deepEqual(JSON.parse(calls[0].init.body), {
+    ride: ride.ride_id, name: 'Sam Rider', email: 'sam@example.com', phone: '', riding: true, pillion: false, guests: 1, guestNames: 'Kim', job: 'BBQ', notes: '', website: '',
+  });
+  const full = async () => ({ ok: false, status: 400, json: async () => ({ error: SIGNUP_WORDS.full }) });
+  assert.deepEqual(await sendCharitySignup(form, ride.jobs, full), { ok: false, error: SIGNUP_WORDS.full });
+  const down = async () => { throw new Error('offline'); };
+  assert.deepEqual(await sendCharitySignup(form, ride.jobs, down), { ok: false, error: SIGNUP_WORDS.offline });
+  const bad = await sendCharitySignup({ ...form, email: 'nope' }, ride.jobs, async () => { throw new Error('should not be called'); });
+  assert.deepEqual(bad, { ok: false, error: SIGNUP_WORDS.badEmail });
+});
+
+test('a ride card escapes text, shows the day in DD/MM/YYYY, and a closed or full ride gets no form', () => {
+  const html = charityRideHtml(ride);
+  assert.ok(html.includes('Bring a &lt;toy&gt;'));
+  assert.ok(html.includes('Royal Children’s Hospital'));
+  assert.ok(html.includes('05/12/2027'));
+  assert.ok(html.includes('Hoppers Crossing'));
+  assert.ok(html.includes('12 places left'));
+  assert.ok(html.includes('Closes 03/12/2027'));
+  assert.ok(html.includes('<form'));
+  assert.ok(html.includes(`value="${ride.ride_id}"`));
+  assert.ok(html.includes('<option value="BBQ">BBQ</option>'));
+  assert.ok(!html.includes('<script'));
+  const closed = charityRideHtml({ ...ride, open: false });
+  assert.ok(!closed.includes('<form'));
+  assert.ok(closed.includes(SIGNUP_WORDS.closed));
+  const full = charityRideHtml({ ...ride, places_left: 0 });
+  assert.ok(full.includes('<form'), 'a full ride still takes helpers');
+  assert.ok(full.includes('Full'));
+  const noJobsFull = charityRideHtml({ ...ride, places_left: 0, jobs: [] });
+  assert.ok(!noJobsFull.includes('<form'));
+  assert.ok(noJobsFull.includes(SIGNUP_WORDS.full));
+  const noLimit = charityRideHtml({ ...ride, places: null, places_left: null, jobs: [], location: null, about: null, closes_on: null });
+  assert.ok(noLimit.includes('<form'));
+  assert.ok(!noLimit.includes('places left'));
+  assert.ok(!noLimit.includes('<select'));
+  assert.equal(charityRideHtml(null), '');
+});
+
+test('loading charity rides never throws and keeps only well-formed rides', async () => {
+  assert.deepEqual(await loadCharityRides(async () => { throw new Error('offline'); }), []);
+  assert.deepEqual(await loadCharityRides(async () => ({ ok: false })), []);
+  const good = async () => ({ ok: true, json: async () => ({ rides: [ride, { nope: true }, null] }) });
+  assert.deepEqual(await loadCharityRides(good), [ride]);
+});

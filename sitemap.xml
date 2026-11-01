@@ -7,6 +7,12 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://www.rustnutssmc.com.au/charity.html</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.rustnutssmc.com.au/resources.html</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>monthly</changefreq>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Charity Rides | Rustnuts SMC | Ride or Help on Our Next Charity Run</title>
+<meta name="description" content="Sign up to ride or help on a Rustnuts SMC charity run. Open to friends, families and other clubs. Rides raising money for children’s hospitals, breast cancer, autism awareness and men’s mental health across Greater Melbourne." />
+<link rel="canonical" href="https://www.rustnutssmc.com.au/charity.html" />
+<meta name="theme-color" content="#8C1C24" />
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Rustnuts SMC" />
+<meta property="og:title" content="Charity Rides | Rustnuts SMC" />
+<meta property="og:description" content="Sign up to ride or help on a Rustnuts SMC charity run. Open to everyone." />
+<meta property="og:image" content="https://www.rustnutssmc.com.au/rustnuts-smc-logo.jpg" />
+<meta property="og:url" content="https://www.rustnutssmc.com.au/charity.html" />
+<meta property="og:locale" content="en_AU" />
+
+<link rel="preload" href="fonts/RustnutsStencil-Regular.ttf" as="font" type="font/ttf" crossorigin />
+<link rel="stylesheet" href="styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Charity Rides | Rustnuts SMC",
+  "url": "https://www.rustnutssmc.com.au/charity.html",
+  "description": "Rustnuts SMC charity rides taking sign-ups from riders and helpers outside the club.",
+  "isPartOf": { "@type": "WebSite", "name": "Rustnuts SMC", "url": "https://www.rustnutssmc.com.au/" }
+}
+</script>
+
+<style>
+  /* page-specific styles on top of styles.css */
+  body{background:var(--ink);overflow-x:hidden}
+  .btn-primary{background:var(--red);color:#fff;border:0;cursor:pointer;font-family:var(--stencil)}
+  .btn-primary:hover{background:var(--red-bright);transform:translateY(-2px)}
+
+  .charity-hero{
+    padding:140px 28px 50px;
+    background:radial-gradient(circle at 70% 30%, rgba(140,28,36,0.35), transparent 55%), var(--ink);
+    text-align:center;position:relative;z-index:2;
+  }
+  .charity-hero h1{font-size:clamp(2.4rem,7vw,4.2rem);margin-bottom:16px}
+  .charity-hero p{color:var(--bone-dim);max-width:60ch;margin:0 auto;font-size:1.1rem}
+
+  section.block{padding:30px 28px 90px;position:relative;z-index:2}
+  .wrap{max-width:760px;margin:0 auto;display:grid;gap:28px}
+  .eyebrow{color:var(--red-text);font-weight:800;letter-spacing:0.25em;text-transform:uppercase;font-size:0.75rem;margin-bottom:10px}
+
+  .charity-ride{
+    background:var(--steel);border:1px solid rgba(255,255,255,0.08);border-radius:8px;
+    padding:26px 24px;display:grid;gap:18px;
+  }
+  .charity-head h2{font-size:clamp(1.7rem,5vw,2.4rem);margin-bottom:8px}
+  .charity-cause{color:var(--bone-dim);font-size:1.05rem}
+  .charity-cause strong{color:var(--bone);font-family:var(--stencil);letter-spacing:0.03em;font-weight:400;font-size:1.15rem}
+  .charity-about{color:var(--bone-dim);white-space:pre-line}
+  .charity-note{color:var(--bone-dim);padding:12px 14px;background:rgba(255,255,255,0.04);border-radius:4px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chip{
+    font-family:var(--stencil);font-size:0.8rem;letter-spacing:0.06em;text-transform:uppercase;
+    padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);color:var(--bone-dim);
+  }
+  .chip-warn{border-color:var(--red-bright);color:var(--red-text)}
+
+  .charity-status{text-align:center;color:var(--bone-dim);padding:30px 0}
+  .charity-privacy{color:var(--bone-mute);font-size:0.85rem;text-align:center;max-width:60ch;margin:0 auto}
+  .charity-privacy a{color:var(--bone-dim)}
+
+  /* the sign-up form: the home page's join form, with a few more fields */
+  /* join enquiry form: posts into the club app */
+  .enquiry{max-width:560px;margin:0 auto 34px;text-align:left;display:grid;gap:16px}
+  .enquiry-row{display:grid;gap:16px}
+  @media(min-width:600px){.enquiry-row{grid-template-columns:1fr 1fr}}
+  .enquiry label{display:block;font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;color:var(--bone-dim)}
+  .enquiry .optional{font-family:"Helvetica Neue",Arial,sans-serif;text-transform:none;letter-spacing:0;color:var(--bone-mute)}
+  .enquiry input[type=text],.enquiry input[type=email],.enquiry textarea{
+    display:block;width:100%;margin-top:6px;padding:12px 14px;font:inherit;font-size:1rem;color:var(--bone);
+    background:var(--steel);border:1px solid rgba(255,255,255,0.12);border-radius:3px;
+  }
+  .enquiry textarea{resize:vertical;min-height:90px}
+  .enquiry-chapter{border:0;padding:0;display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center}
+  .enquiry-chapter legend{font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;color:var(--bone-dim);margin-bottom:8px}
+  .enquiry-chapter label{display:flex;align-items:center;gap:8px;font-family:"Helvetica Neue",Arial,sans-serif;text-transform:none;letter-spacing:0;font-size:1rem;color:var(--bone)}
+  .enquiry-chapter input{accent-color:var(--red-bright);width:18px;height:18px}
+  .enquiry-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .enquiry-msg{min-height:1.4em;font-size:0.95rem;color:var(--bone-dim)}
+  .enquiry-msg.bad{color:var(--red-text)}
+  .enquiry-msg.good{color:#8fd19e}
+  .enquiry .btn{justify-self:start}
+  .enquiry .btn[disabled]{opacity:0.6;cursor:wait}
+  .enquiry-or{color:var(--bone-mute);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:4px}
+  .join{position:relative}
+  .enquiry{margin:0;max-width:none}
+  .enquiry input[type=tel],.enquiry input[type=number],.enquiry select{
+    width:100%;margin-top:6px;padding:12px 14px;border-radius:4px;border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.04);color:var(--bone);font:inherit;font-size:1rem;
+  }
+  /* typed input stays in the plain font, as the brand rules say; labels keep the stencil */
+  .enquiry input,.enquiry select,.enquiry textarea{font-family:"Helvetica Neue",Arial,sans-serif}
+  .enquiry select option{background:var(--steel);color:var(--bone)}
+  .enquiry input[type=checkbox]{accent-color:var(--red-bright);width:20px;height:20px}
+  .enquiry input[disabled]{opacity:0.5}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="brand">
+    <img src="rustnuts-smc-logo.jpg" alt="Rustnuts SMC logo" />
+  </a>
+  <nav class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="resources.html">Support</a>
+    <a href="shop.html" class="nav-shop">Shop</a>
+    <a href="index.html#join">Join</a>
+  </nav>
+  <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-label="Menu" aria-controls="nav-mobile">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<nav class="nav-mobile" id="nav-mobile" aria-label="Mobile navigation">
+  <a href="index.html">Home</a>
+  <a href="resources.html">Support</a>
+  <a href="shop.html" class="nav-shop">Shop</a>
+  <a href="index.html#join">Join</a>
+</nav>
+
+<section class="charity-hero">
+  <h1 class="display">Charity Rides</h1>
+  <p>Our charity runs are open to everyone: friends, family, other clubs. Sign up to ride, bring a pillion or a few mates, or lend a hand on the day. The organisers see your answer straight away.</p>
+</section>
+
+<section class="block">
+  <div class="wrap" id="charity-rides">
+    <p class="charity-status" id="charity-status" role="status" aria-live="polite">Loading the rides…</p>
+  </div>
+  <p class="charity-privacy" style="margin-top:34px">Your name, email, phone and answers go only to the people running that ride and are deleted with it. Sign up again with the same email to change your answer, or <a href="mailto:rustnutssmc@outlook.com">email the club</a> to come off the list.</p>
+</section>
+
+<footer>
+  <p class="motto">Rust Till Dust</p>
+  <p><strong>Rustnuts SMC</strong> — Rustnuts Social Motorcycle Club Incorporated</p>
+  <p>Greater Melbourne, Victoria, Australia &nbsp;|&nbsp; <a href="index.html">Back to home</a></p>
+  <p style="margin-top:10px">&copy; <span id="yr"></span> Rustnuts SMC. All rights reserved.</p>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent=new Date().getFullYear();
+
+  // mobile nav toggle
+  (function(){
+    const toggle = document.getElementById('nav-toggle');
+    const panel = document.getElementById('nav-mobile');
+    if(!toggle || !panel) return;
+    function closeMenu(){ toggle.setAttribute('aria-expanded','false'); panel.classList.remove('open'); }
+    function openMenu(){ toggle.setAttribute('aria-expanded','true'); panel.classList.add('open'); }
+    toggle.addEventListener('click', ()=>{
+      if(toggle.getAttribute('aria-expanded')==='true'){ closeMenu(); } else { openMenu(); }
+    });
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && toggle.getAttribute('aria-expanded')==='true'){ closeMenu(); toggle.focus(); }
+    });
+    panel.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
+  })();
+</script>
+
+<script type="module">
+  import { charityRideHtml, loadCharityRides, sendCharitySignup, signupFromForm, SIGNUP_WORDS } from './app/site-api.js';
+
+  const list = document.getElementById('charity-rides');
+  const status = document.getElementById('charity-status');
+
+  // The rides come from the club app: only the ones whose organiser chose to take website sign-ups.
+  loadCharityRides().then((rides) => {
+    const html = rides.map(charityRideHtml).join('');
+    if (!html) { status.textContent = SIGNUP_WORDS.none; return; }
+    status.remove();
+    list.innerHTML = html;
+    list.querySelectorAll('form.charity-form').forEach(wire);
+  });
+
+  // Each form is checked here with the app's words, then sent into the app's sign-up sheet.
+  function wire(form) {
+    const jobs = JSON.parse(form.dataset.jobs || '[]');
+    const msg = form.querySelector('.enquiry-msg');
+    const send = form.querySelector('button[type=submit]');
+    const riding = form.querySelector('input[name=riding]');
+    const pillion = form.querySelector('input[name=pillion]');
+    const syncPillion = () => { if (riding && pillion && !riding.disabled) { pillion.disabled = !riding.checked; if (!riding.checked) pillion.checked = false; } };
+    riding?.addEventListener('change', syncPillion);
+    syncPillion();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = signupFromForm(new FormData(form));
+      msg.className = 'enquiry-msg'; msg.textContent = '';
+      send.disabled = true; send.textContent = 'Sending…';
+      const result = await sendCharitySignup(input, jobs);
+      send.disabled = false; send.textContent = 'Sign Up';
+      if (result.ok) {
+        form.reset(); syncPillion();
+        msg.className = 'enquiry-msg good'; msg.textContent = SIGNUP_WORDS.thanks;
+      } else {
+        msg.className = 'enquiry-msg bad'; msg.textContent = result.error;
+      }
+    });
+  }
+</script>
+</body>
+</html>
