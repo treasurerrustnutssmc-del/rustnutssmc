@@ -50,23 +50,28 @@ test('loading sponsors never throws', async () => {
 });
 
 test('an app ride becomes the calendar event shape the home page already understands', async () => {
-  const { RIDE_LABELS, rideToEvent, loadRides } = await import('../app/site-api.js');
+  const { RIDE_LABELS, rideToEvent, loadRides, melbourneDate } = await import('../app/site-api.js');
   assert.deepEqual(Object.keys(RIDE_LABELS), ['north', 'west', 'club', 'supported', 'non_nuts']);
   const timed = rideToEvent({
     id: 'r1', title: 'West Sunday Run', starts_at: '2026-11-08T22:00:00+00:00', ends_at: '2026-11-09T02:00:00+00:00',
-    all_day: false, category: 'west', location: 'Bacchus Marsh', notes: 'Meet 9am', cancelled_at: null,
+    all_day: false, category: 'west', location: 'Bacchus Marsh', notes: 'Meet 9am\nLabel: North', cancelled_at: null,
   });
   assert.deepEqual(timed, {
     id: 'r1',
     summary: 'West Sunday Run',
     start: { dateTime: '2026-11-08T22:00:00+00:00' },
     end: { dateTime: '2026-11-09T02:00:00+00:00' },
-    description: 'Where: Bacchus Marsh\nMeet 9am\nLabel: West',
+    description: 'Label: West\nWhere: Bacchus Marsh\nMeet 9am',
     cancelled: false,
   });
-  const allDay = rideToEvent({ id: 'r2', title: 'Not Dead Yet Run', starts_at: '2026-12-05T13:00:00+00:00', ends_at: null, all_day: true, category: 'club', location: null, notes: null, cancelled_at: '2026-11-01T00:00:00+00:00' });
+  // An all-day ride is stored as Melbourne midnight, which comes back in UTC the evening before.
+  assert.equal(melbourneDate('2026-12-04T13:00:00+00:00'), '2026-12-05');
+  assert.equal(melbourneDate('2026-07-04T14:00:00+00:00'), '2026-07-05');
+  assert.equal(melbourneDate('nope'), null);
+  const allDay = rideToEvent({ id: 'r2', title: 'Not Dead Yet Run', starts_at: '2026-12-04T13:00:00+00:00', ends_at: '2026-12-05T13:00:00+00:00', all_day: true, category: 'club', location: null, notes: null, cancelled_at: '2026-11-01T00:00:00+00:00' });
   assert.equal(allDay.summary, 'CANCELLED: Not Dead Yet Run');
   assert.deepEqual(allDay.start, { date: '2026-12-05' });
+  assert.deepEqual(allDay.end, { date: '2026-12-06' });
   assert.equal(allDay.description, 'Label: Rustnuts');
   assert.equal(allDay.cancelled, true);
   assert.equal(rideToEvent({ id: 'x', title: 'Odd', starts_at: '2026-12-05T13:00:00+00:00', category: 'mystery' }), null);

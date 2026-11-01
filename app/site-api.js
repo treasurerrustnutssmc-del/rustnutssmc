@@ -95,23 +95,36 @@ export const RIDE_LABELS = {
   non_nuts: 'Non-Nuts Events',
 };
 
+const MELBOURNE_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Melbourne', year: 'numeric', month: '2-digit', day: '2-digit' });
+/** The Melbourne calendar date (YYYY-MM-DD) of an instant: the app stores an all-day ride as
+ *  Melbourne midnight, which the feed returns in UTC, the evening before. */
+export function melbourneDate(iso) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : MELBOURNE_DATE.format(d);
+}
+const LABEL_TAG = /label\s*:\s*[^\n\r<]+/gi;
+
 /** One app ride as a calendar event, or null when it is not a ride the page can show. */
 export function rideToEvent(ride) {
   if (!ride || typeof ride !== 'object' || typeof ride.starts_at !== 'string' || typeof ride.title !== 'string') return null;
   const label = RIDE_LABELS[ride.category];
   if (!label) return null;
   const allDay = ride.all_day === true;
-  const when = (iso) => (allDay ? { date: String(iso).slice(0, 10) } : { dateTime: iso });
+  const when = (iso) => (allDay ? { date: melbourneDate(iso) } : { dateTime: iso });
+  const start = when(ride.starts_at);
+  if (allDay && !start.date) return null;
   const summary = ride.cancelled_at ? `CANCELLED: ${ride.title}` : ride.title;
-  const lines = [];
+  // The app's category is the one label the page reads (it takes the first "Label:" tag), so it
+  // goes first and any tag typed into the calendar notes is dropped rather than shown twice.
+  const lines = [`Label: ${label}`];
   if (ride.location) lines.push(`Where: ${ride.location}`);
-  if (ride.notes) lines.push(String(ride.notes));
-  lines.push(`Label: ${label}`);
+  const notes = ride.notes ? String(ride.notes).replace(LABEL_TAG, '').trim() : '';
+  if (notes) lines.push(notes);
   return {
     id: ride.id,
     summary,
-    start: when(ride.starts_at),
-    end: ride.ends_at ? when(ride.ends_at) : when(ride.starts_at),
+    start,
+    end: ride.ends_at ? when(ride.ends_at) : start,
     description: lines.join('\n'),
     cancelled: Boolean(ride.cancelled_at),
   };
