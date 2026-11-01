@@ -371,6 +371,15 @@
   .sponsor h3{font-family:var(--stencil);font-weight:400;text-transform:uppercase;font-size:1.05rem;letter-spacing:0.02em;margin-bottom:6px}
   .sponsor p{color:var(--bone-dim);font-size:0.9rem}
 
+  /* club photos strip: picked in the club app by the Social Media Officer, hidden until something arrives */
+  .photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:40px}
+  @media(min-width:720px){.photo-grid{grid-template-columns:repeat(4,1fr);gap:14px}}
+  .photo-item{margin:0;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden}
+  .photo-item a{display:block;aspect-ratio:4/3;background:var(--steel)}
+  .photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+  .photo-item a:hover img{transform:scale(1.03)}
+  .photo-item figcaption{font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.06em;font-size:0.78rem;color:var(--bone-dim);padding:8px 10px}
+  .photo-more{margin-top:30px}
   /* club news strip: posted from the club app's Board screen, hidden until something arrives */
   .news-grid{display:grid;gap:18px;margin-top:40px}
   @media(min-width:720px){.news-grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
@@ -454,6 +463,7 @@
     <a href="#podcast">Podcast</a>
     <a href="#docs">Club Docs</a>
     <a href="charity.html">Charity Rides</a>
+    <a href="photos.html">Photos</a>
     <a href="resources.html">Support</a>
     <a href="shop.html" class="nav-shop">Shop</a>
     <a href="#join">Join</a>
@@ -469,6 +479,7 @@
   <a href="#podcast">Podcast</a>
   <a href="#docs">Club Docs</a>
   <a href="charity.html">Charity Rides</a>
+  <a href="photos.html">Photos</a>
   <a href="resources.html">Support</a>
   <a href="shop.html" class="nav-shop">Shop</a>
   <a href="#join">Join</a>
@@ -810,6 +821,20 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
   </div>
 </section>
 
+<section class="block photos" id="photos" hidden>
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Out On The Road</p>
+      <h2 class="display">Club Photos</h2>
+      <p class="lead">Picked by the club’s Social Media Officer from the rides, straight out of the club app.</p>
+    </div>
+    <div class="photo-grid reveal" id="photo-grid"></div>
+    <div class="photo-more reveal">
+      <a href="photos.html" class="btn btn-ghost">See More Club Photos</a>
+    </div>
+  </div>
+</section>
+
 <!-- SPONSORS -->
 <section class="block sponsors" id="sponsors" hidden>
   <div class="wrap">
@@ -1033,7 +1058,7 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
   });
 </script>
 <script type="module">
-  import { loadNews, loadRides, loadSponsors, newsHtml, sponsorsHtml, sendEnquiry, WORDS } from './app/site-api.js';
+  import { homePhotosHtml, loadNews, loadPhotos, loadRides, loadSponsors, newsHtml, sponsorsHtml, sendEnquiry, WORDS } from './app/site-api.js';
 
   // Rides: the club app's public feed first (the calendar script above reads this promise on
   // DOMContentLoaded and falls back to the calendar worker when it is empty).
@@ -1056,6 +1081,16 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
     if (!html) return;
     document.getElementById('news-grid').innerHTML = html;
     const section = document.getElementById('news');
+    section.hidden = false;
+    section.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
+  });
+
+  // Club photos: picked in the app by the Social Media Officer; the strip stays hidden unless there's something to show.
+  loadPhotos().then((list) => {
+    const html = homePhotosHtml(list);
+    if (!html) return;
+    document.getElementById('photo-grid').innerHTML = html;
+    const section = document.getElementById('photos');
     section.hidden = false;
     section.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
   });
