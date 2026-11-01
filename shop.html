@@ -52,7 +52,7 @@
           "@type": "Product",
           "name": "Rustnuts SMC Member Design",
           "image": "https://www.rustnutssmc.com.au/shop/member-front.jpg",
-          "description": "Members-only Rustnuts SMC merch design, unlocked with the club code word."
+          "description": "Members-only Rustnuts SMC merch design, ordered through the club Discord."
         }
       },
       {
@@ -62,7 +62,7 @@
           "@type": "Product",
           "name": "Rustnuts SMC Family Design",
           "image": "https://www.rustnutssmc.com.au/shop/family-front.jpg",
-          "description": "Members-only Rustnuts SMC Family merch design, unlocked with the club code word."
+          "description": "Members-only Rustnuts SMC Family merch design, ordered through the club Discord."
         }
       },
       {
@@ -187,20 +187,6 @@
   }
   .order-btn:disabled:hover{background:transparent;border-color:rgba(255,255,255,0.25)}
 
-  .gate{display:flex;gap:8px;margin-top:6px}
-  .gate input{
-    flex:1;background:var(--ink);border:1px solid rgba(255,255,255,0.15);color:var(--bone);
-    padding:9px 10px;border-radius:4px;font-size:0.88rem;
-  }
-  .gate input.error{border-color:var(--red-bright)}
-  .gate-error{color:var(--red-text);font-size:0.8rem;margin-top:6px}
-  .gate button{
-    padding:9px 16px;background:var(--red);border:1px solid var(--red);color:#fff;
-    font-weight:700;letter-spacing:0.06em;text-transform:uppercase;font-size:0.76rem;
-    border-radius:4px;cursor:pointer;
-  }
-  .gate button:hover{background:var(--red-bright);border-color:var(--red-bright)}
-
   .shipping-estimator{
     max-width:520px;margin:0 auto;padding:22px 26px;background:var(--steel);
     border:1px solid rgba(255,255,255,0.07);border-radius:8px;text-align:center;
@@ -297,13 +283,10 @@
 
 <script type="module">
   import { CATALOG } from './shop/catalog.js';
-  import { checkCodeWord } from './shop/gate.js';
   import { AU_STATES, getShippingCost } from './shop/shipping.js';
   import { formatCents } from './shop/format.js';
 
   document.getElementById('yr').textContent = new Date().getFullYear();
-
-  const unlockedGated = new Set();
 
   // Merch ordering happens on the Jotform App's Product List cart pages. There's no
   // per-garment field to prefill (a Product List cart has no single "garment" field)
@@ -339,7 +322,7 @@
   }
 
   // Discord-ordering placeholder cards: a non-functional visual copy of the Member and
-  // Family cards, shown above everything else. No gate, no colour control, no click
+  // Family cards, shown above everything else. No colour control, no click
   // handler on the button -- purely decorative, not wired to anything.
   function buildDiscordPlaceholderCard(design) {
     const card = document.createElement('div');
@@ -387,17 +370,6 @@
       const card = document.createElement('div');
       card.className = 'product-card';
 
-      const locked = design.gated && !unlockedGated.has(design.id);
-
-      const gateHtml = locked
-        ? `<div class="gate">
-             <label for="gate-input-${design.id}" class="sr-only">Club code word</label>
-             <input type="text" id="gate-input-${design.id}" placeholder="Enter club code word" class="gate-input">
-             <button type="button" class="gate-submit">Unlock</button>
-           </div>
-           <p class="gate-error" aria-live="polite" hidden>Incorrect code word, please try again</p>`
-        : '';
-
       // Only render a visible colour dropdown when there's an actual choice to make.
       // A single-colour design (e.g. Member/Family with colours: ['Black']) still needs
       // a colour value present for the colourViews image-swap logic below, so it's
@@ -414,12 +386,10 @@
 
       const comingSoon = COMING_SOON_DESIGN_IDS.has(design.id);
 
-      const orderHtml = !locked
-        ? `<div class="order-controls">
+      const orderHtml = `<div class="order-controls">
              ${comingSoon ? '' : colourControlHtml}
              <button type="button" class="order-btn"${comingSoon ? ' disabled' : ''}>${comingSoon ? 'Coming Soon' : 'Order this design'}</button>
-           </div>`
-        : '';
+           </div>`;
 
       // colourViews (if present) supplies alternate front/back art for specific colour
       // options (e.g. Supporter's Hi-Vis). Each combination gets its own image tagged
@@ -455,7 +425,6 @@
         <div class="product-info">
           <div class="name">${comingSoon ? 'Design Coming Soon' : design.name}</div>
           ${comingSoon ? '' : '<span class="avail">Full sizing &amp; pricing on the order form</span>'}
-          ${gateHtml}
           ${orderHtml}
         </div>
       `;
@@ -495,20 +464,7 @@
         colourSelectEl.addEventListener('change', updateMediaView);
       }
 
-      if (locked) {
-        const input = card.querySelector('.gate-input');
-        const submit = card.querySelector('.gate-submit');
-        const errorMsg = card.querySelector('.gate-error');
-        submit.addEventListener('click', () => {
-          if (checkCodeWord(input.value)) {
-            unlockedGated.add(design.id);
-            renderDesigns();
-          } else {
-            input.classList.add('error');
-            if (errorMsg) errorMsg.hidden = false;
-          }
-        });
-      } else if (!comingSoon) {
+      if (!comingSoon) {
         const orderBtn = card.querySelector('.order-btn');
         orderBtn.addEventListener('click', () => {
           openOrderPageFor(design);
