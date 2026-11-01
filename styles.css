@@ -1,34 +1,60 @@
 /* ============================================================
    Rustnuts SMC — shared site styles
    Extracted from index.html, shop.html, resources.html and
-   coming-soon.html: custom properties, base typography, header/
+   coming-soon.html: base typography, header/
    nav (incl. mobile hamburger), footer and the base .btn class.
    Page-specific styles (hero, product grid, resource cards, etc.)
    stay in each page's own <style> block.
    ============================================================ */
 
-/* The club typeface, the same file the app ships (OFL licence in fonts/OFL.txt) */
+/* The club colours and fonts come from the app's theme (the block between the brand markers);
+   the club typeface is the same file the app ships (OFL licence in fonts/OFL.txt). */
 @font-face{
-  font-family:"Rustnuts Stencil";
+  font-family:"RustnutsStencil";
   src:url("fonts/RustnutsStencil-Regular.ttf") format("truetype");
   font-display:swap;
 }
 
+/* brand:start (generated from the Rustnuts app, src/theme.ts; edit there, then npm run build:site) */
+/* Generated from the Rustnuts app: club colours, ride calendar colours and fonts. */
 :root{
-  --red:#8C1C24;
-  --red-bright:#B92632;
-  --red-text:#F2666F; /* AA on ink, steel and footer surfaces; --red-bright stays for fills and borders */
-  --bone-mute:#96928a;
   --ink:#111010;
+  --ink2:#171515;
+  --steel:#2a2a2c;
+  --steel-hi:#353437;
+  --line:rgba(244,241,234,0.10);
+  --line-strong:rgba(244,241,234,0.22);
   --bone:#F4F1EA;
   --bone-dim:#d8d3c7;
-  --steel:#2a2a2c;
-  --stencil:"Rustnuts Stencil","Arial Black","Helvetica Neue",sans-serif;
+  --bone-mute:#96928a;
+  --red:#8C1C24;
+  --red-bright:#B92632;
+  --red-text:#F2666F;
+  --ok:#7BC48F;
+  --ok-bg:rgba(123,196,143,0.12);
+  --warn:#E9A83A;
+  --warn-bg:rgba(233,168,58,0.12);
+  --danger:#F2666F;
+  --danger-bg:rgba(242,102,111,0.12);
+  --logo-plate:#FFFFFF;
+  --ride-north-bg:#2B64A8;
+  --ride-north-fg:#FFFFFF;
+  --ride-west-bg:#8C1C24;
+  --ride-west-fg:#F4F1EA;
+  --ride-club-bg:#F4F1EA;
+  --ride-club-fg:#111010;
+  --ride-supported-bg:#2A7048;
+  --ride-supported-fg:#FFFFFF;
+  --ride-non-nuts-bg:#55555A;
+  --ride-non-nuts-fg:#FFFFFF;
+  --stencil:"RustnutsStencil", "Arial Black", "Helvetica Neue", sans-serif;
+  --body:"Helvetica Neue", Arial, sans-serif;
 }
+/* brand:end */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:76px}
 body{
-  font-family:"Helvetica Neue",Arial,sans-serif;
+  font-family:var(--body);
   color:var(--bone);
   line-height:1.6;
 }

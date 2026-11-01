@@ -79,7 +79,7 @@
   .enquiry-row{display:grid;gap:16px}
   @media(min-width:600px){.enquiry-row{grid-template-columns:1fr 1fr}}
   .enquiry label{display:block;font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;color:var(--bone-dim)}
-  .enquiry .optional{font-family:"Helvetica Neue",Arial,sans-serif;text-transform:none;letter-spacing:0;color:var(--bone-mute)}
+  .enquiry .optional{font-family:var(--body);text-transform:none;letter-spacing:0;color:var(--bone-mute)}
   .enquiry input[type=text],.enquiry input[type=email],.enquiry textarea{
     display:block;width:100%;margin-top:6px;padding:12px 14px;font:inherit;font-size:1rem;color:var(--bone);
     background:var(--steel);border:1px solid rgba(255,255,255,0.12);border-radius:3px;
@@ -87,7 +87,7 @@
   .enquiry textarea{resize:vertical;min-height:90px}
   .enquiry-chapter{border:0;padding:0;display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center}
   .enquiry-chapter legend{font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;color:var(--bone-dim);margin-bottom:8px}
-  .enquiry-chapter label{display:flex;align-items:center;gap:8px;font-family:"Helvetica Neue",Arial,sans-serif;text-transform:none;letter-spacing:0;font-size:1rem;color:var(--bone)}
+  .enquiry-chapter label{display:flex;align-items:center;gap:8px;font-family:var(--body);text-transform:none;letter-spacing:0;font-size:1rem;color:var(--bone)}
   .enquiry-chapter input{accent-color:var(--red-bright);width:18px;height:18px}
   .enquiry-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   .enquiry-msg{min-height:1.4em;font-size:0.95rem;color:var(--bone-dim)}
@@ -103,7 +103,7 @@
     background:rgba(255,255,255,0.04);color:var(--bone);font:inherit;font-size:1rem;
   }
   /* typed input stays in the plain font, as the brand rules say; labels keep the stencil */
-  .enquiry input,.enquiry select,.enquiry textarea{font-family:"Helvetica Neue",Arial,sans-serif}
+  .enquiry input,.enquiry select,.enquiry textarea{font-family:var(--body)}
   .enquiry select option{background:var(--steel);color:var(--bone)}
   .enquiry input[type=checkbox]{accent-color:var(--red-bright);width:20px;height:20px}
   .enquiry input[disabled]{opacity:0.5}
