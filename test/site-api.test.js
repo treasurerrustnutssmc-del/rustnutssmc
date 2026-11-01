@@ -121,6 +121,8 @@ test('a form element becomes the form the function expects', () => {
     guestNames: 'Kim, Lee', job: 'BBQ', notes: '', website: '',
   });
   assert.equal(signupFromForm(new Map([['guests', 'two']])).guests, Number.NaN);
+  assert.equal(signupFromForm(new Map([['guests', '']])).guests, 0, 'a full ride leaves guests out: none');
+  assert.equal(signupFromForm(new Map()).guests, 0);
 });
 
 test('sending posts the trimmed sign-up with the honeypot and reads the answer', async () => {
@@ -165,6 +167,7 @@ test('a ride card escapes text, shows the day in DD/MM/YYYY, and a closed or ful
   assert.ok(!noLimit.includes('places left'));
   assert.ok(!noLimit.includes('<select'));
   assert.equal(charityRideHtml(null), '');
+  assert.ok(charityRideHtml({ ...ride, starts_at: 'not a date' }).includes('<form'), 'a bad date never blanks the page');
 });
 
 test('loading charity rides never throws and keeps only well-formed rides', async () => {

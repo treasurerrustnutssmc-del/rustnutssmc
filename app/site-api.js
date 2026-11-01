@@ -193,7 +193,8 @@ export function charitySignupProblem(input, jobs) {
 /** The fields of one sign-up form (a FormData, or anything with .get) as the input above. */
 export function signupFromForm(data) {
   const text = (k) => String(data.get(k) ?? '');
-  const guestsTyped = text('guests').trim();
+  // A blank field (or one a full ride leaves out) is no guests.
+  const guestsTyped = text('guests').trim() || '0';
   return {
     ride: text('ride'), name: text('name'), email: text('email'), phone: text('phone'),
     riding: data.get('riding') != null, pillion: data.get('pillion') != null,
@@ -250,7 +251,8 @@ export function charityRideHtml(r) {
   if (!isRide(r)) return '';
   const jobs = Array.isArray(r.jobs) ? r.jobs.filter((j) => typeof j === 'string' && j.trim()) : [];
   const id = String(r.ride_id);
-  const when = `${auDate(r.starts_at)}${r.all_day ? '' : ` · ${MELBOURNE_TIME.format(new Date(r.starts_at))}`}`;
+  const start = new Date(r.starts_at);
+  const when = Number.isNaN(start.getTime()) ? '' : `${auDate(r.starts_at)}${r.all_day ? '' : ` · ${MELBOURNE_TIME.format(start)}`}`;
   const left = typeof r.places_left === 'number' ? r.places_left : null;
   const full = left !== null && left <= 0;
   const open = r.open === true;
