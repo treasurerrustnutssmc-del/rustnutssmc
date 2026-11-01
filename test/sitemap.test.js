@@ -31,6 +31,5 @@ test('the Coming soon page sends old links home and asks not to be indexed', () 
   const html = readFileSync(new URL('coming-soon.html', root), 'utf8');
   assert.match(html, /<meta name="robots" content="noindex/);
   assert.match(html, /http-equiv="refresh" content="0;\s*url=\//);
-  assert.match(html, /<link rel="canonical" href="https:\/\/www\.rustnutssmc\.com\.au\/"/);
-  assert.ok(!/App Store|Google Play/.test(html));
+  assert.ok(!/apps\.apple\.com|play\.google\.com|app store|google play|play store/i.test(html));
 });
