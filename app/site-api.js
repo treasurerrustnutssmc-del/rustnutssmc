@@ -143,3 +143,177 @@ export async function loadRides(fetchFn = fetch) {
     return [];
   }
 }
+
+// ---------------------------------------------------------------------------
+// Charity ride sign-ups (charity.html): the rides whose organiser ticked "Take sign-ups from the
+// website" in the app, and a sign-up form under each that posts into the app's sign-up sheet.
+// ---------------------------------------------------------------------------
+
+// The same words and order as the app's src/domain/websiteSignups.ts and the function.
+export const SIGNUP_WORDS = {
+  notOnWebsite: 'This ride isn’t taking sign-ups from the website.',
+  closed: 'Sign-ups have closed.',
+  noName: 'Tell us your name.',
+  longName: 'Keep your name to 80 characters.',
+  badEmail: 'That email address does not look right.',
+  longPhone: 'Keep the phone number to 30 characters.',
+  nothingPicked: 'Say you’re riding, or pick a job to help with.',
+  pillionNeedsRider: 'A pillion needs a rider: say you’re riding too.',
+  guests: 'Guests: 0 to 10.',
+  jobNotListed: 'That job isn’t on the list.',
+  tooLong: 'Keep it short: 200 characters for guests’ names, 200 for notes.',
+  tooMany: 'Too many sign-ups just now. Try again later, or email the club.',
+  full: 'The ride’s full.',
+  offline: 'Could not reach the club just now. Try again in a minute, or email rustnutssmc@outlook.com.',
+  thanks: 'You’re on the list. The organisers have your details; sign up again with the same email to change your answer.',
+  none: 'No charity rides are taking sign-ups just now. Keep an eye on the calendar.',
+};
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_GUESTS = 10;
+
+/** Why this sign-up can't be sent, or null when it can; `jobs` is the ride's helper-job list. */
+export function charitySignupProblem(input, jobs) {
+  if (!UUID.test(String(input.ride ?? ''))) return SIGNUP_WORDS.notOnWebsite;
+  const name = String(input.name ?? '').trim();
+  if (!name) return SIGNUP_WORDS.noName;
+  if (name.length > 80) return SIGNUP_WORDS.longName;
+  const email = String(input.email ?? '').trim();
+  if (email.length > 200 || !EMAIL.test(email)) return SIGNUP_WORDS.badEmail;
+  if (String(input.phone ?? '').trim().length > 30) return SIGNUP_WORDS.longPhone;
+  const riding = input.riding === true;
+  const job = String(input.job ?? '').trim();
+  if (!riding && !job) return SIGNUP_WORDS.nothingPicked;
+  if (!riding && input.pillion === true) return SIGNUP_WORDS.pillionNeedsRider;
+  if (!Number.isInteger(input.guests) || input.guests < 0 || input.guests > MAX_GUESTS) return SIGNUP_WORDS.guests;
+  if (job && !(Array.isArray(jobs) && jobs.includes(job))) return SIGNUP_WORDS.jobNotListed;
+  if (String(input.guestNames ?? '').trim().length > 200 || String(input.notes ?? '').trim().length > 200) return SIGNUP_WORDS.tooLong;
+  return null;
+}
+
+/** The fields of one sign-up form (a FormData, or anything with .get) as the input above. */
+export function signupFromForm(data) {
+  const text = (k) => String(data.get(k) ?? '');
+  // A blank field (or one a full ride leaves out) is no guests.
+  const guestsTyped = text('guests').trim() || '0';
+  return {
+    ride: text('ride'), name: text('name'), email: text('email'), phone: text('phone'),
+    riding: data.get('riding') != null, pillion: data.get('pillion') != null,
+    guests: /^\d+$/.test(guestsTyped) ? Number(guestsTyped) : Number.NaN,
+    guestNames: text('guestNames'), job: text('job'), notes: text('notes'), website: text('website'),
+  };
+}
+
+/** Sends the sign-up; resolves to { ok: true } or { ok: false, error }. Never throws. */
+export async function sendCharitySignup(input, jobs, fetchFn = fetch) {
+  const problem = charitySignupProblem(input, jobs);
+  if (problem) return { ok: false, error: problem };
+  const riding = input.riding === true;
+  try {
+    const r = await fetchFn(`${SITE_API}/charity-signup`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        ride: String(input.ride),
+        name: String(input.name).trim(),
+        email: String(input.email).trim().toLowerCase(),
+        phone: String(input.phone ?? '').trim(),
+        riding,
+        pillion: riding && input.pillion === true,
+        guests: input.guests,
+        guestNames: String(input.guestNames ?? '').trim(),
+        job: String(input.job ?? '').trim(),
+        notes: String(input.notes ?? '').trim(),
+        website: String(input.website ?? ''),
+      }),
+    });
+    const body = await r.json().catch(() => ({}));
+    if (r.ok) return { ok: true };
+    return { ok: false, error: typeof body.error === 'string' && body.error ? body.error : SIGNUP_WORDS.offline };
+  } catch {
+    return { ok: false, error: SIGNUP_WORDS.offline };
+  }
+}
+
+const MELBOURNE_AU = new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Melbourne', day: '2-digit', month: '2-digit', year: 'numeric' });
+const MELBOURNE_TIME = new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Melbourne', hour: 'numeric', minute: '2-digit' });
+/** 2027-12-05 or an instant as DD/MM/YYYY (Melbourne). */
+export function auDate(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value ?? ''));
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '' : MELBOURNE_AU.format(d);
+}
+
+const isRide = (r) => r && typeof r === 'object' && UUID.test(String(r.ride_id)) && typeof r.title === 'string' && typeof r.starts_at === 'string' && typeof r.cause === 'string';
+
+/** One charity ride as a card with its sign-up form, or '' when it isn't a ride the page can show. */
+export function charityRideHtml(r) {
+  if (!isRide(r)) return '';
+  const jobs = Array.isArray(r.jobs) ? r.jobs.filter((j) => typeof j === 'string' && j.trim()) : [];
+  const id = String(r.ride_id);
+  const start = new Date(r.starts_at);
+  const when = Number.isNaN(start.getTime()) ? '' : `${auDate(r.starts_at)}${r.all_day ? '' : ` · ${MELBOURNE_TIME.format(start)}`}`;
+  const left = typeof r.places_left === 'number' ? r.places_left : null;
+  const full = left !== null && left <= 0;
+  const open = r.open === true;
+  const chips = [
+    open && r.closes_on ? `<span class="chip chip-warn">Closes ${esc(auDate(r.closes_on))}</span>` : '',
+    !open ? '<span class="chip">Closed</span>' : '',
+    left !== null && open ? `<span class="chip ${full ? 'chip-warn' : ''}">${full ? 'Full' : `${left} place${left === 1 ? '' : 's'} left`}</span>` : '',
+  ].join('');
+  // Closed: no form. Full with jobs: helpers only. Full without jobs: nothing to sign up for.
+  let body;
+  if (!open) body = `<p class="charity-note">${esc(SIGNUP_WORDS.closed)}</p>`;
+  else if (full && jobs.length === 0) body = `<p class="charity-note">${esc(SIGNUP_WORDS.full)}</p>`;
+  else body = signupFormHtml(id, jobs, full);
+  return `<article class="charity-ride" id="ride-${esc(id)}">
+  <div class="charity-head">
+    <p class="eyebrow">${esc(when)}${r.location ? ` · ${esc(r.location)}` : ''}</p>
+    <h2 class="display">${esc(r.title)}</h2>
+    <p class="charity-cause">Raising money for <strong>${esc(r.cause)}</strong></p>
+    <div class="chips">${chips}</div>
+  </div>
+  ${r.about ? `<p class="charity-about">${esc(r.about)}</p>` : ''}
+  ${body}
+</article>`;
+}
+
+function signupFormHtml(id, jobs, full) {
+  const jobOptions = jobs.map((j) => `<option value="${esc(j)}">${esc(j)}</option>`).join('');
+  return `<form class="enquiry charity-form" data-ride="${esc(id)}" data-jobs="${esc(JSON.stringify(jobs))}" novalidate>
+    <input type="hidden" name="ride" value="${esc(id)}">
+    ${full ? `<p class="charity-note">${esc(SIGNUP_WORDS.full)} Helpers are still welcome.</p>` : ''}
+    <div class="enquiry-row">
+      <label>Your name<input type="text" name="name" autocomplete="name" maxlength="80" required></label>
+      <label>Email<input type="email" name="email" autocomplete="email" maxlength="200" required></label>
+    </div>
+    <label>Phone <span class="optional">(optional)</span><input type="tel" name="phone" autocomplete="tel" maxlength="30"></label>
+    <fieldset class="enquiry-chapter charity-ride-opts">
+      <legend>On the day</legend>
+      <label><input type="checkbox" name="riding" ${full ? '' : 'checked'} ${full ? 'disabled' : ''}> I’m riding</label>
+      <label><input type="checkbox" name="pillion" ${full ? 'disabled' : ''}> Bringing a pillion</label>
+    </fieldset>
+    <div class="enquiry-row">
+      <label>Guests on bikes <span class="optional">(0 to ${MAX_GUESTS})</span><input type="number" name="guests" inputmode="numeric" min="0" max="${MAX_GUESTS}" value="0" ${full ? 'disabled' : ''}></label>
+      <label>Guests’ names <span class="optional">(optional)</span><input type="text" name="guestNames" maxlength="200" ${full ? 'disabled' : ''}></label>
+    </div>
+    ${jobs.length > 0 ? `<label>Helping with <span class="optional">(optional)</span><select name="job"><option value="">Not helping</option>${jobOptions}</select></label>` : ''}
+    <label>Notes <span class="optional">(optional)</span><textarea name="notes" rows="2" maxlength="200" placeholder="Arriving late, bringing the trailer"></textarea></label>
+    <!-- Not for people: left empty by everyone but robots -->
+    <label class="enquiry-hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+    <p class="enquiry-msg" role="status" aria-live="polite"></p>
+    <button type="submit" class="btn btn-primary">Sign Up</button>
+  </form>`;
+}
+
+/** Loads the charity rides taking website sign-ups; resolves to [] on any failure. */
+export async function loadCharityRides(fetchFn = fetch) {
+  try {
+    const r = await fetchFn(`${SITE_API}/charity-rides`);
+    if (!r.ok) return [];
+    const body = await r.json();
+    return Array.isArray(body.rides) ? body.rides.filter(isRide) : [];
+  } catch {
+    return [];
+  }
+}
