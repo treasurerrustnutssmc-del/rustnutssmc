@@ -7,6 +7,13 @@
    stay in each page's own <style> block.
    ============================================================ */
 
+/* The club typeface, the same file the app ships (OFL licence in fonts/OFL.txt) */
+@font-face{
+  font-family:"Rustnuts Stencil";
+  src:url("fonts/RustnutsStencil-Regular.ttf") format("truetype");
+  font-display:swap;
+}
+
 :root{
   --red:#8C1C24;
   --red-bright:#B92632;
@@ -16,7 +23,7 @@
   --bone:#F4F1EA;
   --bone-dim:#d8d3c7;
   --steel:#2a2a2c;
-  --stencil:"Saira Stencil One","Arial Black","Helvetica Neue",sans-serif;
+  --stencil:"Rustnuts Stencil","Arial Black","Helvetica Neue",sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:76px}
@@ -49,7 +56,7 @@ header{
   border-bottom:1px solid rgba(255,255,255,0.08);
 }
 header .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-header .brand img{height:42px;width:auto;display:block}
+header .brand img{height:48px;width:auto;display:block}
 header .brand span{
   font-family:var(--stencil);
   font-weight:400;letter-spacing:0.06em;font-size:1.15rem;color:var(--bone);
