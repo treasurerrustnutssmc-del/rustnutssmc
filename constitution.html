@@ -157,5 +157,6 @@
     if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
   });
 </script>
+<script type="module">import { recordVisit } from './app/site-api.js'; recordVisit();</script>
 </body>
 </html>
