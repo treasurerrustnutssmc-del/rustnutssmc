@@ -47,12 +47,12 @@ const YOUTH_INFANT_GARMENTS = {
 const FAMILY_GARMENTS = { ...GARMENTS, ...YOUTH_INFANT_GARMENTS };
 
 export const CATALOG = [
-  { id: 'member', name: 'Member', gated: false, garments: GARMENTS, image: 'shop/member-front.jpg', imageBack: 'shop/member-back.jpg', colours: ['Black'] },
-  { id: 'family', name: 'Family', gated: false, garments: FAMILY_GARMENTS, image: 'shop/family-front.jpg', imageBack: 'shop/family-back.jpg', colours: ['Black'] },
+  { id: 'member', name: 'Member', garments: GARMENTS, image: 'shop/member-front.jpg', imageBack: 'shop/member-back.jpg', colours: ['Black'] },
+  { id: 'family', name: 'Family', garments: FAMILY_GARMENTS, image: 'shop/family-front.jpg', imageBack: 'shop/family-back.jpg', colours: ['Black'] },
   // `colourViews` links a colour-select option to the Front/Back images that should be
   // shown while that colour is selected. Any colour not listed here (e.g. Black/Grey)
   // falls back to the design's standard `image`/`imageBack`. This keeps the colour
   // dropdown and the Front/Back view toggle in sync — see shop.html `renderDesigns()`.
-  { id: 'supporter', name: 'Better with you in it!', gated: false, garments: SUPPORTER_GARMENTS, image: 'shop/supporter-front.jpg', imageBack: 'shop/supporter-back.jpg', colourViews: { 'Hi-Vis': { front: 'shop/supporter-hivis-front.jpg', back: 'shop/supporter-hivis-back.jpg' } }, colours: ['Black', 'Grey', 'Hi-Vis'] },
-  { id: 'fourth-design', name: 'RU OK', gated: false, garments: GARMENTS, image: 'shop/fourth-design-front.jpg', colours: ['Black', 'Grey'] },
+  { id: 'supporter', name: 'Better with you in it!', garments: SUPPORTER_GARMENTS, image: 'shop/supporter-front.jpg', imageBack: 'shop/supporter-back.jpg', colourViews: { 'Hi-Vis': { front: 'shop/supporter-hivis-front.jpg', back: 'shop/supporter-hivis-back.jpg' } }, colours: ['Black', 'Grey', 'Hi-Vis'] },
+  { id: 'fourth-design', name: 'RU OK', garments: GARMENTS, image: 'shop/fourth-design-front.jpg', colours: ['Black', 'Grey'] },
 ];
