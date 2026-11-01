@@ -30,3 +30,16 @@ test('the app pages say nothing about the stores and stay out of the nav and sit
     assert.ok(!/app\/(privacy|posting-rules|support|guide|delete-account)\.html/.test(html), `${page}: no link to the app pages yet`);
   }
 });
+
+// The Road Rules' public face, also generated from the app repo: Chris's diagrams only. The full
+// written rules members sign stay in the app.
+test('the illustrated Road Rules page has all 17 diagrams beside it and the home page links to it', () => {
+  const html = readFileSync('app/road-rules.html', 'utf8');
+  assert.ok(html.includes('<link rel="canonical" href="https://www.rustnutssmc.com.au/app/road-rules.html" />'));
+  const images = [...html.matchAll(/<img src="(road-rules\/[a-z0-9-]+\.png)"/g)].map((m) => m[1]);
+  assert.equal(images.length, 17);
+  for (const src of images) assert.ok(existsSync(`app/${src}`), src);
+  assert.ok(!/apps\.apple\.com|play\.google\.com|app store|google play|play store/i.test(html), 'no store links or names');
+  assert.ok(!html.includes('Pack safety comes before ego'), 'none of the written rules');
+  assert.ok(readFileSync('index.html', 'utf8').includes('href="app/road-rules.html"'), 'the Club Documents card');
+});
