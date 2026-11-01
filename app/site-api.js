@@ -447,3 +447,18 @@ export async function loadNews(fetchFn = fetch) {
     return [];
   }
 }
+
+// Visitor counts. One ping per page view into the club app's counter, kept there as a number per
+// day per page: no cookies, no addresses, nothing about the person. Skipped when the browser asks
+// not to be tracked. Never waits for an answer and never throws.
+export function recordVisit(path = location.pathname, fetchFn = fetch, nav = navigator) {
+  try {
+    if (nav.doNotTrack === '1' || nav.globalPrivacyControl === true) return false;
+    const body = JSON.stringify({ page: path === '/index.html' ? '/' : path });
+    if (typeof nav.sendBeacon === 'function' && nav.sendBeacon(`${SITE_API}/visit`, new Blob([body], { type: 'application/json' }))) return true;
+    fetchFn(`${SITE_API}/visit`, { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    return true;
+  } catch {
+    return false;
+  }
+}
