@@ -412,3 +412,38 @@ export async function loadDocuments(fetchFn = fetch) {
     return [];
   }
 }
+
+// Club news. The board writes a short notice on the app's Board screen and the feed gives the
+// newest five that are less than 60 days old, with nothing personal (id, title, body, link, date).
+// The home page's "Club news" strip stays hidden until there's something to show.
+const isNews = (n) => n && typeof n === 'object' && typeof n.title === 'string' && n.title.trim() !== ''
+  && typeof n.body === 'string' && n.body.trim() !== '' && typeof n.created_at === 'string';
+const httpsHref = (u) => (/^https:\/\/\S+$/.test(String(u ?? '')) ? String(u) : null);
+
+/** The notice cards as HTML, or '' when there's nothing to show. */
+export function newsHtml(list) {
+  if (!Array.isArray(list)) return '';
+  const items = list.filter(isNews);
+  if (items.length === 0) return '';
+  return items.map((n) => {
+    const href = httpsHref(n.link);
+    return `<article class="news-item">`
+      + `<time datetime="${esc(n.created_at)}">${esc(auDate(n.created_at))}</time>`
+      + `<h3>${esc(n.title)}</h3>`
+      + `<p>${esc(n.body)}</p>`
+      + (href ? `<a class="news-more" href="${esc(href)}" target="_blank" rel="noopener">More</a>` : '')
+      + `</article>`;
+  }).join('');
+}
+
+/** Loads the news; resolves to [] on any failure so the strip just stays hidden. */
+export async function loadNews(fetchFn = fetch) {
+  try {
+    const r = await fetchFn(`${SITE_API}/news`);
+    if (!r.ok) return [];
+    const body = await r.json();
+    return Array.isArray(body.news) ? body.news.filter(isNews) : [];
+  } catch {
+    return [];
+  }
+}
