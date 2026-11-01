@@ -32,9 +32,7 @@
 <meta name="twitter:image" content="https://www.rustnutssmc.com.au/rustnuts-smc-logo.jpg" />
 
 <!-- ============ STENCIL BRAND FONT ============ -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&display=swap" rel="stylesheet" />
+<link rel="preload" href="fonts/RustnutsStencil-Regular.ttf" as="font" type="font/ttf" crossorigin />
 <link rel="stylesheet" href="styles.css" />
 
 <!-- ============ STRUCTURED DATA (tells Google the official identity) ============ -->
@@ -77,6 +75,7 @@
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     flex:none;position:relative;transition:border-color .2s,color .2s;
   }
+  .music-btn svg[hidden]{display:none}
   .music-btn::after{content:"";position:absolute;inset:-9px}
   .music-btn:hover{border-color:var(--red-bright);color:var(--red-text)}
   .music-progress{
@@ -105,7 +104,7 @@
     content:"";position:absolute;left:50%;top:50%;z-index:0;
     transform:translate(-50%,-50%);
     width:min(820px,85vw);aspect-ratio:1/1;
-    background:url("final-badge.png") center/contain no-repeat;
+    background:url("final-badge.webp") center/contain no-repeat;
     opacity:0.4;pointer-events:none;
   }
   .hero-grid{
@@ -254,6 +253,11 @@
   }
   .panel-contact a:hover{color:var(--red-text);border-color:var(--red-bright)}
 
+  /* GET THE APP (hidden until launch) */
+  .get-app{background:var(--steel);text-align:center}
+  .get-app .lead{margin:0 auto 30px}
+  .get-app .app-btns{justify-content:center}
+  .get-app .app-note{margin-top:22px;color:var(--bone-mute);font-size:0.92rem}
   /* JOIN / CONTACT */
   .join{
     background:
@@ -375,16 +379,15 @@
 </head>
 <body>
 
-<audio id="theme-song" src="rust-til-dust.mp3" loop autoplay muted preload="auto"></audio>
+<audio id="theme-song" src="rust-til-dust.mp3" loop preload="none"></audio>
 
 <header>
   <div class="brand">
     <img src="rustnuts-smc-logo.jpg" alt="Rustnuts SMC logo" />
-    <span>RUSTNUTS&nbsp;SMC</span>
     <div class="music-ctrl" id="music-ctrl">
-      <button id="music-toggle" class="music-btn" type="button" aria-label="Pause theme song" aria-pressed="true">
-        <svg id="icon-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="5" y="4" width="5" height="16" fill="currentColor"/><rect x="14" y="4" width="5" height="16" fill="currentColor"/></svg>
-        <svg id="icon-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" hidden><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg>
+      <button id="music-toggle" class="music-btn" type="button" aria-label="Play theme song" aria-pressed="false">
+        <svg id="icon-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" hidden><rect x="5" y="4" width="5" height="16" fill="currentColor"/><rect x="14" y="4" width="5" height="16" fill="currentColor"/></svg>
+        <svg id="icon-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg>
       </button>
       <div class="music-progress" id="music-progress" role="slider" aria-label="Theme song progress" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <div class="music-progress-fill" id="music-progress-fill"></div>
@@ -805,6 +808,22 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
 </section>
 
 <!-- JOIN -->
+<!-- GET THE APP: kept hidden until Apple approves the iPhone app (club launch rule).
+     On launch day: remove the hidden attribute, put the store addresses in the two links,
+     and add "App" to both navs. -->
+<section class="block get-app" id="app" hidden>
+  <div class="wrap">
+    <p class="eyebrow">The Rustnuts App</p>
+    <h2 class="display">The Club In Your Pocket</h2>
+    <p class="lead">Rides and RSVPs, club chat, meetings and votes, your membership card and fees, all in one place. For members, FNGs, supporters and families.</p>
+    <div class="btns app-btns">
+      <a class="btn btn-primary" href="#" data-store="ios" rel="noopener">App Store</a>
+      <a class="btn btn-ghost" href="#" data-store="android" rel="noopener">Google Play</a>
+    </div>
+    <p class="app-note">New to the club? Download the app and tap “Ask to join”. The chapter board takes it from there.</p>
+  </div>
+</section>
+
 <section class="block join" id="join">
   <div class="wrap reveal">
     <p class="eyebrow">Get Involved</p>
@@ -829,8 +848,8 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
 
-  // background theme song — browsers block autoplay until a user gesture,
-  // so retry play() on first interaction if the initial attempt was blocked
+  // theme song: plays only when someone presses play, so the 11 MB track
+  // isn't downloaded on every visit (preload="none" on the <audio>)
   const themeSong = document.getElementById('theme-song');
   const musicToggle = document.getElementById('music-toggle');
   const iconPlay = document.getElementById('icon-play');
@@ -840,21 +859,16 @@ Object.keys(listEls).forEach(function (k) { if (listEls[k]) listEls[k].innerHTML
 
   function syncMusicIcon(){
     const playing = !themeSong.paused && !themeSong.muted;
-    iconPlay.hidden = playing;
-    iconPause.hidden = !playing;
+    // SVG elements ignore .hidden, so set the attribute (styled display:none below)
+    iconPlay.toggleAttribute('hidden', playing);
+    iconPause.toggleAttribute('hidden', !playing);
     musicToggle.setAttribute('aria-pressed', playing);
     musicToggle.setAttribute('aria-label', playing ? 'Pause theme song' : 'Play theme song');
   }
-  // autoplay-with-sound is blocked by browsers until a user gesture, so we
-  // start muted (always allowed) and unmute on the first interaction
-  themeSong.play().catch(() => {});
   const unmuteAndPlay = () => {
     themeSong.muted = false;
     themeSong.play().then(syncMusicIcon).catch(() => {});
   };
-  ['click','touchstart','keydown','scroll'].forEach(evt=>{
-    document.addEventListener(evt, unmuteAndPlay, { once:true, passive:true });
-  });
 
   musicToggle.addEventListener('click', (e)=>{
     e.stopPropagation();
