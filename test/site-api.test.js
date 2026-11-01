@@ -48,3 +48,34 @@ test('loading sponsors never throws', async () => {
   assert.deepEqual(await loadSponsors(async () => ({ ok: false })), []);
   assert.deepEqual(await loadSponsors(async () => { throw new Error('offline'); }), []);
 });
+
+test('an app ride becomes the calendar event shape the home page already understands', async () => {
+  const { RIDE_LABELS, rideToEvent, loadRides } = await import('../app/site-api.js');
+  assert.deepEqual(Object.keys(RIDE_LABELS), ['north', 'west', 'club', 'supported', 'non_nuts']);
+  const timed = rideToEvent({
+    id: 'r1', title: 'West Sunday Run', starts_at: '2026-11-08T22:00:00+00:00', ends_at: '2026-11-09T02:00:00+00:00',
+    all_day: false, category: 'west', location: 'Bacchus Marsh', notes: 'Meet 9am', cancelled_at: null,
+  });
+  assert.deepEqual(timed, {
+    id: 'r1',
+    summary: 'West Sunday Run',
+    start: { dateTime: '2026-11-08T22:00:00+00:00' },
+    end: { dateTime: '2026-11-09T02:00:00+00:00' },
+    description: 'Where: Bacchus Marsh\nMeet 9am\nLabel: West',
+    cancelled: false,
+  });
+  const allDay = rideToEvent({ id: 'r2', title: 'Not Dead Yet Run', starts_at: '2026-12-05T13:00:00+00:00', ends_at: null, all_day: true, category: 'club', location: null, notes: null, cancelled_at: '2026-11-01T00:00:00+00:00' });
+  assert.equal(allDay.summary, 'CANCELLED: Not Dead Yet Run');
+  assert.deepEqual(allDay.start, { date: '2026-12-05' });
+  assert.equal(allDay.description, 'Label: Rustnuts');
+  assert.equal(allDay.cancelled, true);
+  assert.equal(rideToEvent({ id: 'x', title: 'Odd', starts_at: '2026-12-05T13:00:00+00:00', category: 'mystery' }), null);
+  assert.equal(rideToEvent(null), null);
+
+  const okFetch = async (url) => { assert.ok(url.endsWith('/site-api/rides')); return { ok: true, json: async () => ({ rides: [{ id: 'r3', title: 'North Pub Run', starts_at: '2026-11-15T00:00:00+00:00', ends_at: null, all_day: false, category: 'north', location: null, notes: null, cancelled_at: null }, { id: 'bad' }] }) }; };
+  const events = await loadRides(okFetch);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].description, 'Label: North');
+  assert.deepEqual(await loadRides(async () => ({ ok: false, json: async () => ({}) })), []);
+  assert.deepEqual(await loadRides(async () => { throw new Error('offline'); }), []);
+});

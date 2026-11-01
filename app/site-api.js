@@ -81,3 +81,52 @@ export async function loadSponsors(fetchFn = fetch) {
     return [];
   }
 }
+
+// The ride list. The app reads the club's Google calendars every quarter hour (its sync-rides
+// function) and this feed is its copy, so the website shows what the app shows: the same rides,
+// the app's cancellations, and later rides made in the app. Each ride is mapped to the shape the
+// home page's calendar code has always used for a Google Calendar event (summary, start, end,
+// description with a "Label: West" tag), so the colours, labels and chapter lists work unchanged.
+export const RIDE_LABELS = {
+  north: 'North',
+  west: 'West',
+  club: 'Rustnuts',
+  supported: 'Supported Club Rides',
+  non_nuts: 'Non-Nuts Events',
+};
+
+/** One app ride as a calendar event, or null when it is not a ride the page can show. */
+export function rideToEvent(ride) {
+  if (!ride || typeof ride !== 'object' || typeof ride.starts_at !== 'string' || typeof ride.title !== 'string') return null;
+  const label = RIDE_LABELS[ride.category];
+  if (!label) return null;
+  const allDay = ride.all_day === true;
+  const when = (iso) => (allDay ? { date: String(iso).slice(0, 10) } : { dateTime: iso });
+  const summary = ride.cancelled_at ? `CANCELLED: ${ride.title}` : ride.title;
+  const lines = [];
+  if (ride.location) lines.push(`Where: ${ride.location}`);
+  if (ride.notes) lines.push(String(ride.notes));
+  lines.push(`Label: ${label}`);
+  return {
+    id: ride.id,
+    summary,
+    start: when(ride.starts_at),
+    end: ride.ends_at ? when(ride.ends_at) : when(ride.starts_at),
+    description: lines.join('\n'),
+    cancelled: Boolean(ride.cancelled_at),
+  };
+}
+
+/** Loads the app's public rides as calendar events; resolves to [] on any failure, so the page
+ *  falls back to the calendar worker. */
+export async function loadRides(fetchFn = fetch) {
+  try {
+    const r = await fetchFn(`${SITE_API}/rides`);
+    if (!r.ok) return [];
+    const body = await r.json();
+    if (!Array.isArray(body.rides)) return [];
+    return body.rides.map(rideToEvent).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
