@@ -448,6 +448,48 @@ export async function loadNews(fetchFn = fetch) {
   }
 }
 
+// Club photos. The Social Media Officer (or their crew) picks them in the app; a photo someone
+// else posted goes up only once that member says yes. The feed carries signed links (an hour),
+// sizes and captions, never names.
+const isPhoto = (p) => p && typeof p === 'object' && typeof p.id === 'string' && /^https:\/\/\S+$/.test(String(p.url ?? ''))
+  && typeof p.taken_at === 'string';
+const PHOTOS_ON_HOME = 8;
+
+/** The gallery as HTML (every photo, or the first `limit`), or '' when there's nothing to show. */
+export function photosHtml(list, limit = Infinity) {
+  if (!Array.isArray(list)) return '';
+  const items = list.filter(isPhoto).slice(0, limit);
+  if (items.length === 0) return '';
+  return items.map((p) => {
+    const caption = typeof p.caption === 'string' && p.caption.trim() ? p.caption.trim() : '';
+    const w = Number.isFinite(p.width) && p.width > 0 ? ` width="${Math.round(p.width)}"` : '';
+    const h = Number.isFinite(p.height) && p.height > 0 ? ` height="${Math.round(p.height)}"` : '';
+    return `<figure class="photo-item">`
+      + `<a href="${esc(p.url)}" target="_blank" rel="noopener">`
+      + `<img src="${esc(p.url)}" alt="${esc(caption || 'Rustnuts club photo')}" loading="lazy" decoding="async"${w}${h} />`
+      + `</a>`
+      + (caption ? `<figcaption>${esc(caption)}</figcaption>` : '')
+      + `</figure>`;
+  }).join('');
+}
+
+/** The home page strip: the newest few. */
+export function homePhotosHtml(list) {
+  return photosHtml(list, PHOTOS_ON_HOME);
+}
+
+/** Loads the photos; resolves to [] on any failure so the strip and page just show nothing. */
+export async function loadPhotos(fetchFn = fetch) {
+  try {
+    const r = await fetchFn(`${SITE_API}/photos`);
+    if (!r.ok) return [];
+    const body = await r.json();
+    return Array.isArray(body.photos) ? body.photos.filter(isPhoto) : [];
+  } catch {
+    return [];
+  }
+}
+
 // Visitor counts. One ping per page view into the club app's counter, kept there as a number per
 // day per page: no cookies, no addresses, nothing about the person. Skipped when the browser asks
 // not to be tracked. Never waits for an answer and never throws.
