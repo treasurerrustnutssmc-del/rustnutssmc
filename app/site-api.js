@@ -165,7 +165,7 @@ export const SIGNUP_WORDS = {
   tooMany: 'Too many sign-ups just now. Try again later, or email the club.',
   full: 'The ride’s full.',
   offline: 'Could not reach the club just now. Try again in a minute, or email rustnutssmc@outlook.com.',
-  thanks: 'You’re on the list. The organisers have your details; sign up again with the same email to change your answer.',
+  thanks: 'You’re on the list. The organisers have your details; to change your answer, email the club.',
   none: 'No charity rides are taking sign-ups just now. Keep an eye on the calendar.',
 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
