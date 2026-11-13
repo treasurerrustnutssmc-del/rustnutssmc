@@ -23,16 +23,21 @@ test('GitHub Pages serves the .well-known folder (Jekyll skips dot-folders other
   assert.ok(!existsSync('.nojekyll'), 'the rest of the site builds as before');
 });
 
-test('Android: once published, assetlinks.json trusts only the club app, with two well-formed keys', { skip: !existsSync('.well-known/assetlinks.json') }, () => {
+test('Android: assetlinks.json trusts only the club app, signed by Play or by the upload key', { skip: !existsSync('.well-known/assetlinks.json') }, () => {
   const links = JSON.parse(readFileSync('.well-known/assetlinks.json', 'utf8'));
   assert.equal(links.length, 1);
   const [s] = links;
   assert.deepEqual(s.relation, ['delegate_permission/common.handle_all_urls']);
   assert.equal(s.target.namespace, 'android_app');
   assert.equal(s.target.package_name, 'au.com.rustnutssmc.app');
-  // Play's app signing key (store installs) and the upload key (test builds).
-  assert.equal(s.target.sha256_cert_fingerprints.length, 2);
-  for (const f of s.target.sha256_cert_fingerprints) assert.match(f, /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
+  // From Play Console › App integrity › App signing (read 14/11/2026): Play's app signing key in
+  // use (store installs), its quantum-ready set, and the upload key (the EAS keystore, which also
+  // signs the android-preview test builds).
+  const keys = s.target.sha256_cert_fingerprints;
+  for (const f of keys) assert.match(f, /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
+  assert.equal(new Set(keys).size, keys.length, 'no repeats');
+  assert.ok(keys.includes('05:14:BE:E4:FD:BE:57:7E:DE:DB:EB:48:EF:BB:84:AE:88:24:90:66:26:B4:04:1C:2C:FD:04:9E:96:66:83:A6'), 'Play app signing key');
+  assert.ok(keys.includes('CE:3B:9A:AA:EE:C8:8F:98:9B:7E:F8:ED:76:94:12:89:C4:B5:E1:87:0B:12:8A:6E:4D:8B:84:AD:84:D1:15:23'), 'upload key (EAS)');
 });
 
 test('iPhone: once published, the association file opens only /open links in the club app', { skip: !existsSync('.well-known/apple-app-site-association') }, () => {

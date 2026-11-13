@@ -1,0 +1,15 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "au.com.rustnutssmc.app",
+      "sha256_cert_fingerprints": [
+        "05:14:BE:E4:FD:BE:57:7E:DE:DB:EB:48:EF:BB:84:AE:88:24:90:66:26:B4:04:1C:2C:FD:04:9E:96:66:83:A6",
+        "E6:EF:7F:33:56:C3:A9:32:9E:1F:67:48:90:FD:4D:F6:6F:2A:90:CB:73:C3:9F:CB:E5:00:D7:6E:96:25:E0:DD",
+        "BD:02:3F:97:93:37:9A:58:92:21:3B:18:C0:7F:8F:D7:E1:64:E0:F7:93:61:6C:F1:64:CC:0E:A3:56:AC:57:32",
+        "CE:3B:9A:AA:EE:C8:8F:98:9B:7E:F8:ED:76:94:12:89:C4:B5:E1:87:0B:12:8A:6E:4D:8B:84:AD:84:D1:15:23"
+      ]
+    }
+  }
+]
