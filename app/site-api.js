@@ -448,29 +448,62 @@ export async function loadNews(fetchFn = fetch) {
   }
 }
 
-// Club photos. The Social Media Officer (or their crew) picks them in the app; a photo someone
-// else posted goes up only once that member says yes. The feed carries signed links (an hour),
-// sizes and captions, never names.
+// Club photos and videos. The Social Media Officer (or their crew) picks them in the app, or
+// approves the ones members ticked "OK for the website" in the app's gallery. The feed carries signed
+// links (an hour), sizes, captions and albums, never names. Videos play from the club's Cloudflare
+// storage; `url` is then the video's still.
 const isPhoto = (p) => p && typeof p === 'object' && typeof p.id === 'string' && /^https:\/\/\S+$/.test(String(p.url ?? ''))
   && typeof p.taken_at === 'string';
+const isHttps = (u) => typeof u === 'string' && /^https:\/\/\S+$/.test(u);
 const PHOTOS_ON_HOME = 8;
+/** The album name for photos from no ride. */
+export const CLUB_LIFE = 'Club life';
+const albumOf = (p) => (typeof p.album === 'string' && p.album.trim() ? p.album.trim() : '');
 
-/** The gallery as HTML (every photo, or the first `limit`), or '' when there's nothing to show. */
-export function photosHtml(list, limit = Infinity) {
+/** The gallery as HTML (every photo, or the first `limit`), or '' when there's nothing to show.
+ *  `album`: only that album ('' for Club life); left out, every album. */
+export function photosHtml(list, limit = Infinity, album) {
   if (!Array.isArray(list)) return '';
-  const items = list.filter(isPhoto).slice(0, limit);
+  const items = list.filter(isPhoto).filter((p) => album === undefined || albumOf(p) === album).slice(0, limit);
   if (items.length === 0) return '';
   return items.map((p) => {
     const caption = typeof p.caption === 'string' && p.caption.trim() ? p.caption.trim() : '';
     const w = Number.isFinite(p.width) && p.width > 0 ? ` width="${Math.round(p.width)}"` : '';
     const h = Number.isFinite(p.height) && p.height > 0 ? ` height="${Math.round(p.height)}"` : '';
-    return `<figure class="photo-item">`
-      + `<a href="${esc(p.url)}" target="_blank" rel="noopener">`
-      + `<img src="${esc(p.url)}" alt="${esc(caption || 'Rustnuts club photo')}" loading="lazy" decoding="async"${w}${h} />`
+    const video = p.kind === 'video' && isHttps(p.video) ? p.video : '';
+    const open = video
+      ? `<a href="${esc(video)}" target="_blank" rel="noopener" data-video="${esc(video)}" aria-label="${esc(`Play the video${caption ? `: ${caption}` : ''}`)}">`
+      : `<a href="${esc(p.url)}" target="_blank" rel="noopener">`;
+    const download = isHttps(p.download)
+      ? `<a href="${esc(p.download)}" class="photo-download" download>Download</a>`
+      : '';
+    return `<figure class="photo-item${video ? ' is-video' : ''}">`
+      + open
+      + `<img src="${esc(p.url)}" alt="${esc(caption || (video ? 'Rustnuts club video' : 'Rustnuts club photo'))}" loading="lazy" decoding="async"${w}${h} />`
+      + (video ? `<span class="play-mark" aria-hidden="true">▶</span>` : '')
       + `</a>`
-      + (caption ? `<figcaption>${esc(caption)}</figcaption>` : '')
+      + (caption || download ? `<figcaption>${caption && download ? `<span>${esc(caption)}</span>` : esc(caption)}${download}</figcaption>` : '')
       + `</figure>`;
   }).join('');
+}
+
+/** The album chips: All, each ride album (newest ride first, with its date), then Club life.
+ *  '' when everything is in one album. data-album '' is Club life; no data-album is All. */
+export function albumsHtml(list) {
+  if (!Array.isArray(list)) return '';
+  const albums = new Map();
+  let clubLife = false;
+  for (const p of list.filter(isPhoto)) {
+    const name = albumOf(p);
+    if (!name) { clubLife = true; continue; }
+    if (!albums.has(name)) albums.set(name, typeof p.album_date === 'string' ? p.album_date : '');
+  }
+  if (albums.size + (clubLife ? 1 : 0) < 2) return '';
+  const rides = [...albums.entries()].sort((a, b) => b[1].localeCompare(a[1]) || a[0].localeCompare(b[0]));
+  const chip = (label, attr, pressed) => `<button type="button" class="album-chip"${attr} aria-pressed="${pressed}">${label}</button>`;
+  return chip('All', '', true)
+    + rides.map(([name, date]) => chip(`${esc(name)}${date ? ` · ${esc(auDate(date))}` : ''}`, ` data-album="${esc(name)}"`, false)).join('')
+    + (clubLife ? chip(CLUB_LIFE, ' data-album=""', false) : '');
 }
 
 /** The home page strip: the newest few. */

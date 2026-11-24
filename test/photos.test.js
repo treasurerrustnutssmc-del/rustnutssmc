@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { homePhotosHtml, loadPhotos, photosHtml } from '../app/site-api.js';
+import { albumsHtml, homePhotosHtml, loadPhotos, photosHtml } from '../app/site-api.js';
 
 const photo = (over = {}) => ({
   id: '11111111-2222-4333-8444-555555555555',
@@ -61,4 +61,55 @@ test('the home page has the hidden photos strip wired to the feed, and every pag
   assert.match(photos, /photosHtml\(list\)/);
   assert.match(photos, /facebook\.com\/RustnutsSMC\/photos_albums/, 'the West albums stay reachable');
   assert.match(photos, /recordVisit\(\)/);
+});
+
+// The club gallery (app spec 2026-11-23-club-gallery-design.md): albums, videos and download links.
+const video = (over = {}) => photo({
+  id: 'v1', kind: 'video', url: 'https://media.example.workers.dev/v/v1.jpg', video: 'https://media.example.workers.dev/v/v1.mp4',
+  download: 'https://media.example.workers.dev/v/v1.mp4?download=1', caption: 'Burnout', album: null, album_date: null, ...over,
+});
+
+test('photosHtml: a video shows its still with a play mark and carries its video for the viewer', () => {
+  const html = photosHtml([video()]);
+  assert.match(html, /<figure class="photo-item is-video"/);
+  assert.match(html, /data-video="https:\/\/media\.example\.workers\.dev\/v\/v1\.mp4"/);
+  assert.match(html, /<span class="play-mark" aria-hidden="true">/);
+  assert.match(html, /aria-label="Play the video: Burnout"/);
+  assert.equal(photosHtml([video({ video: 'javascript:alert(1)' })]).includes('data-video'), false, 'only https videos');
+});
+
+test('photosHtml: each photo and video has a download link when the feed gives one', () => {
+  const html = photosHtml([photo({ download: 'https://x.supabase.co/a.jpg?download=rustnuts.jpg' }), video()]);
+  assert.equal(html.match(/class="photo-download"/g).length, 2);
+  assert.match(html, /href="https:\/\/x\.supabase\.co\/a\.jpg\?download=rustnuts\.jpg" class="photo-download" download/);
+  assert.equal(photosHtml([photo()]).includes('photo-download'), false, 'none without one');
+});
+
+test('photosHtml: an album filter shows only that album; Club life is the ones with none', () => {
+  const list = [photo({ id: 'a', album: 'Run to Lorne', album_date: '2026-11-09' }), photo({ id: 'b', album: null }), video({ album: 'Run to Lorne', album_date: '2026-11-09' })];
+  assert.equal(photosHtml(list, Infinity, 'Run to Lorne').match(/photo-item/g).length, 2);
+  assert.equal(photosHtml(list, Infinity, '').match(/photo-item/g).length, 1);
+  assert.equal(photosHtml(list).match(/photo-item/g).length, 3);
+});
+
+test('albumsHtml: All, then each ride album newest first with its date, then Club life; none when there is only one', () => {
+  const list = [
+    photo({ id: 'a', album: 'Run to Lorne', album_date: '2026-11-09' }),
+    photo({ id: 'b', album: 'Big 4 <weekend>', album_date: '2026-11-21' }),
+    photo({ id: 'c', album: null }),
+    photo({ id: 'd', album: 'Run to Lorne', album_date: '2026-11-09' }),
+  ];
+  const html = albumsHtml(list);
+  const labels = [...html.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((m) => m[1]);
+  assert.deepEqual(labels, ['All', 'Big 4 &lt;weekend&gt; · 21/11/2026', 'Run to Lorne · 09/11/2026', 'Club life']);
+  assert.match(html, /aria-pressed="true"[^>]*>All</);
+  assert.equal(albumsHtml([photo()]), '', 'one album: no chips');
+});
+
+test('photos.html has the album chips, a viewer that plays videos, and every photo’s download link', () => {
+  const page = readFileSync(new URL('../photos.html', import.meta.url), 'utf8');
+  assert.match(page, /id="photo-albums"/);
+  assert.match(page, /<dialog class="viewer" id="viewer"/);
+  assert.match(page, /<video[^>]*controls/);
+  assert.match(page, /albumsHtml\(list\)/);
 });
