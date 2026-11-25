@@ -60,13 +60,36 @@
   .photo-item a:hover img{transform:scale(1.03)}
   .photo-item figcaption{font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.06em;font-size:0.78rem;color:var(--bone-dim);padding:8px 10px}
   .photos-status{color:var(--bone-dim);text-align:center}
+  .photo-item{position:relative}
+  .play-mark{position:absolute;left:10px;top:10px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.6);color:var(--bone);display:grid;place-items:center;font-size:0.95rem;pointer-events:none}
+  .photo-item figcaption{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+  .photo-item .photo-download{aspect-ratio:auto;background:none;color:var(--bone-dim);text-decoration:underline;text-underline-offset:3px;white-space:nowrap;min-height:24px;display:inline-flex;align-items:center}
+  .photo-download:hover{color:var(--red-text)}
+  .album-chips{display:flex;flex-wrap:nowrap;gap:8px;margin:0 -16px 18px;padding:0 16px 4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .album-chips::-webkit-scrollbar{display:none}
+  @media(min-width:720px){.album-chips{flex-wrap:wrap;margin:0 0 18px;padding:0;overflow:visible}}
+  .album-chips[hidden]{display:none}
+  .album-chip{font-family:var(--stencil);text-transform:uppercase;letter-spacing:0.05em;font-size:0.8rem;padding:10px 14px;min-height:44px;border-radius:4px;border:1px solid rgba(255,255,255,0.2);background:var(--steel);color:var(--bone);cursor:pointer;flex:0 0 auto;white-space:nowrap}
+  .album-chip[aria-pressed="true"]{background:var(--red);border-color:var(--red-bright)}
+  .album-chip:focus-visible{outline:2px solid var(--red-bright);outline-offset:2px}
+  .viewer{border:0;padding:0;margin:auto;background:#000;color:var(--bone);width:min(100vw,1100px);max-width:100vw;max-height:100dvh;overflow:auto}
+  .viewer:not([open]){display:none}
+  .viewer::backdrop{background:rgba(0,0,0,0.92)}
+  .viewer-frame{display:grid;place-items:center;background:#000}
+  .viewer-frame img,.viewer-frame video{max-width:100%;max-height:78dvh;display:block}
+  .viewer-frame [hidden],.viewer-bar [hidden]{display:none!important}
+  .viewer-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;padding:12px 14px;background:var(--ink)}
+  .viewer-caption{flex:1 1 100%;margin:0;color:var(--bone-dim)}
+  @media(min-width:720px){.viewer-caption{flex:1 1 auto}}
 
   .albums{margin-top:60px;display:grid;gap:18px}
   @media(min-width:720px){.albums{grid-template-columns:1fr 1fr}}
   .album{background:var(--steel);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:26px 24px;display:grid;gap:12px}
   .album h2{font-size:1.6rem}
   .album p{color:var(--bone-dim)}
-  .btn-ghost{border:2px solid var(--bone-dim);color:var(--bone)}
+  .btn-ghost{border:2px solid var(--bone-dim);color:var(--bone);background:transparent}
+  button.btn{font:inherit;cursor:pointer}
+  .viewer-bar .btn{font-family:var(--stencil);padding:12px 22px}
   .btn-ghost:hover{border-color:var(--red-bright);color:var(--red-text);transform:translateY(-2px)}
   .photos-note{color:var(--bone-dim);font-size:0.9rem;margin-top:34px;text-align:center}
 </style>
@@ -99,12 +122,13 @@
 <section class="photos-hero">
   <p class="eyebrow">Out On The Road</p>
   <h1 class="display">Club Photos</h1>
-  <p>Rides, runs and get-togethers, picked by the club’s Social Media Officer and crew straight out of the club app. No names, and any member can take their own photo down.</p>
+  <p>Photos and videos from rides, runs and get-togethers, straight out of the club app and checked by the club’s Social Media Officer and crew. No names, and any member can take their own down.</p>
 </section>
 
 <section class="block">
   <div class="wrap">
     <p class="photos-status" id="photos-status" role="status" aria-live="polite">Loading the photos…</p>
+    <div class="album-chips" id="photo-albums" role="group" aria-label="Albums" hidden></div>
     <div class="photo-grid" id="photo-grid"></div>
 
     <div class="albums">
@@ -122,6 +146,18 @@
     <p class="photos-note">In one of these and want it taken down? <a href="mailto:rustnutssmc@outlook.com">Email the club</a> and it comes off.</p>
   </div>
 </section>
+
+<dialog class="viewer" id="viewer" aria-label="Photo viewer">
+  <div class="viewer-frame">
+    <img id="viewer-img" alt="" hidden />
+    <video id="viewer-video" controls playsinline preload="metadata" hidden></video>
+  </div>
+  <div class="viewer-bar">
+    <p class="viewer-caption" id="viewer-caption"></p>
+    <a class="btn btn-ghost viewer-download" id="viewer-download" download hidden>Download</a>
+    <button type="button" class="btn btn-ghost" id="viewer-close">Close</button>
+  </div>
+</dialog>
 
 <footer>
   <p class="motto">Rust Till Dust</p>
@@ -151,17 +187,59 @@
 </script>
 
 <script type="module">
-  import { loadPhotos, photosHtml } from './app/site-api.js';
+  import { albumsHtml, loadPhotos, photosHtml } from './app/site-api.js';
 
   const grid = document.getElementById('photo-grid');
   const status = document.getElementById('photos-status');
-  // The photos come from the club app: the ones the Social Media Officer picked, newest first.
+  const chips = document.getElementById('photo-albums');
+  const viewer = document.getElementById('viewer');
+  const img = document.getElementById('viewer-img');
+  const vid = document.getElementById('viewer-video');
+  const cap = document.getElementById('viewer-caption');
+  const dl = document.getElementById('viewer-download');
+  let opener = null;
+
+  // The photos and videos come from the club app, newest first, with album chips when there's more than one album.
   loadPhotos().then((list) => {
     const html = photosHtml(list);
     if (!html) { status.textContent = 'No photos picked yet. The chapter albums below have plenty.'; return; }
     status.remove();
     grid.innerHTML = html;
+    const albums = albumsHtml(list);
+    if (!albums) return;
+    chips.innerHTML = albums;
+    chips.hidden = false;
+    chips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.album-chip');
+      if (!chip) return;
+      chips.querySelectorAll('.album-chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      grid.innerHTML = photosHtml(list, Infinity, chip.hasAttribute('data-album') ? chip.dataset.album : undefined);
+    });
   });
+
+  // Tapping a photo or video opens it here (where the browser has <dialog>); the plain link is the fallback.
+  grid.addEventListener('click', (e) => {
+    const link = e.target.closest('figure.photo-item > a');
+    if (!link || typeof viewer.showModal !== 'function') return;
+    e.preventDefault();
+    opener = link;
+    const fig = link.closest('figure');
+    const video = link.dataset.video;
+    const still = link.querySelector('img');
+    const download = fig.querySelector('.photo-download');
+    img.hidden = !!video;
+    vid.hidden = !video;
+    if (video) { vid.poster = still.src; vid.src = video; } else { img.src = still.src; img.alt = still.alt; }
+    cap.textContent = still.alt === 'Rustnuts club photo' || still.alt === 'Rustnuts club video' ? '' : still.alt;
+    dl.hidden = !download;
+    if (download) dl.href = download.href;
+    viewer.showModal();
+    if (video) vid.play().catch(() => {});
+  });
+  const close = () => viewer.close();
+  document.getElementById('viewer-close').addEventListener('click', close);
+  viewer.addEventListener('click', (e) => { if (e.target === viewer) close(); });
+  viewer.addEventListener('close', () => { vid.pause(); vid.removeAttribute('src'); vid.load(); opener?.focus(); });
 </script>
 <script type="module">import { recordVisit } from './app/site-api.js'; recordVisit();</script>
 </body>
