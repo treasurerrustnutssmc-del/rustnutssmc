@@ -43,3 +43,10 @@ test('the illustrated Road Rules page has all 17 diagrams beside it and the home
   assert.ok(!html.includes('Pack safety comes before ego'), 'none of the written rules');
   assert.ok(readFileSync('index.html', 'utf8').includes('href="app/road-rules.html"'), 'the Club Documents card');
 });
+
+test('privacy page names WillyWeather for ride weather, matching the app policy', () => {
+  const html = readFileSync(new URL('../app/privacy.html', import.meta.url), 'utf8');
+  assert.ok(html.includes('WillyWeather (Bureau of Meteorology forecasts)'), 'names WillyWeather');
+  assert.ok(!html.includes('Open-Meteo gives ride weather. Your phone asks it directly'), 'old Open-Meteo-only wording gone');
+  assert.ok(html.includes('Last updated 25/11/2026'), 'date bumped');
+});
